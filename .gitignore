@@ -1,0 +1,10 @@
+node_modules/
+dist/
+release/
+.vite/
+.DS_Store
+*.local
+.env
+.env.local
+.vercel/
+.commandcode/

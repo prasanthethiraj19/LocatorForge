@@ -1,0 +1,23 @@
+/**
+ * Tiny on-page indicator shown while the recorder is capturing events.
+ * Mirrors the visual language of the picker overlay (#__qlc_overlay).
+ */
+#__qlc_recorder_dot {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  width: 12px;
+  height: 12px;
+  background: #dc2626;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.18), 0 2px 8px rgba(0, 0, 0, 0.25);
+  z-index: 2147483647;
+  pointer-events: none;
+  display: none;
+  animation: __qlc_rec_pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes __qlc_rec_pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.25); opacity: 0.7; }
+}

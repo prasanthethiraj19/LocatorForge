@@ -1,0 +1,288 @@
+/* ─── Test Data Modal ────────────────────────────────────────── */
+
+/* Modal frame reuses .qlc-modal-backdrop and .qlc-modal from index.css.
+   Below are the additions specific to the test data table layout. */
+
+.qlc-testdata-modal {
+  max-width: 1080px;
+}
+
+.qlc-testdata-head-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.qlc-testdata-body {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+}
+
+.qlc-testdata-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--qlc-border);
+  background: var(--qlc-bg-alt);
+  flex-wrap: wrap;
+}
+
+.qlc-testdata-meta-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--qlc-fg-muted);
+  font-weight: 600;
+}
+
+.qlc-testdata-meta-target {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-family: var(--qlc-mono);
+  font-size: 11px;
+  color: var(--qlc-fg-muted);
+}
+
+.qlc-testdata-meta-target code {
+  font-family: var(--qlc-mono);
+  background: var(--qlc-bg-row);
+  border: 1px solid var(--qlc-border);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--qlc-fg);
+}
+
+.qlc-testdata-type-pill {
+  background: var(--qlc-accent-soft);
+  color: var(--qlc-accent);
+  border: 1px solid var(--qlc-accent);
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-family: var(--qlc-mono);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.qlc-testdata-type-select {
+  font-family: var(--qlc-mono);
+  font-size: 11px;
+  padding: 4px 24px 4px 8px;
+  border: 1px solid var(--qlc-border-strong);
+  border-radius: 4px;
+  background: var(--qlc-bg-row);
+  color: var(--qlc-fg);
+  cursor: pointer;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--qlc-fg-muted) 50%), linear-gradient(135deg, var(--qlc-fg-muted) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.qlc-testdata-type-select:focus { outline: 2px solid var(--qlc-accent); outline-offset: -1px; }
+
+.qlc-testdata-fill-status {
+  font-size: 11px;
+  color: var(--qlc-accent);
+  font-family: var(--qlc-mono);
+  margin-left: auto;
+}
+
+.qlc-testdata-fill-status-err {
+  color: var(--qlc-rose);
+}
+
+.qlc-testdata-table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background: var(--qlc-bg);
+}
+
+.qlc-testdata-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+  font-family: var(--qlc-mono);
+}
+
+.qlc-testdata-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  text-align: left;
+  padding: 8px 10px;
+  background: var(--qlc-bg-alt);
+  border-bottom: 1px solid var(--qlc-border-strong);
+  color: var(--qlc-fg-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.qlc-testdata-th-realistic { border-left: 3px solid var(--qlc-accent); }
+.qlc-testdata-th-edge      { border-left: 3px solid var(--qlc-cyan); }
+.qlc-testdata-th-invalid   { border-left: 3px solid var(--qlc-rose); }
+
+.qlc-testdata-table tbody tr {
+  border-bottom: 1px solid var(--qlc-border);
+}
+
+.qlc-testdata-table tbody tr:hover {
+  background: var(--qlc-bg-alt);
+}
+
+.qlc-testdata-table td {
+  padding: 6px 10px;
+  vertical-align: top;
+  width: 33.33%;
+  border-left: 1px solid var(--qlc-border);
+}
+
+.qlc-testdata-table td:first-child {
+  border-left: none;
+}
+
+.qlc-testdata-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+}
+
+.qlc-testdata-value {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--qlc-mono);
+  font-size: 11.5px;
+  color: var(--qlc-fg);
+  background: var(--qlc-bg-row);
+  border: 1px solid var(--qlc-border);
+  border-radius: 3px;
+  padding: 4px 6px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  user-select: all;
+  max-height: 100px;
+  overflow: auto;
+}
+
+.qlc-testdata-cell-empty .qlc-testdata-value {
+  color: var(--qlc-fg-subtle);
+  font-style: italic;
+}
+
+.qlc-testdata-cell-actions {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.qlc-testdata-mini {
+  border: 1px solid var(--qlc-border-strong);
+  background: var(--qlc-bg-row);
+  color: var(--qlc-fg-muted);
+  height: 20px;
+  min-width: 20px;
+  padding: 0 4px;
+  border-radius: 3px;
+  font-size: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  transition: all 100ms;
+}
+
+.qlc-testdata-mini:hover:not(:disabled) {
+  background: var(--qlc-bg-alt);
+  border-color: var(--qlc-accent);
+  color: var(--qlc-accent);
+}
+
+.qlc-testdata-mini:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.qlc-testdata-mini-copied {
+  background: var(--qlc-accent-soft);
+  border-color: var(--qlc-accent);
+  color: var(--qlc-accent);
+}
+
+.qlc-testdata-mini-fill {
+  background: var(--qlc-violet-soft);
+  border-color: var(--qlc-violet);
+  color: var(--qlc-violet);
+}
+
+.qlc-testdata-mini-fill:hover:not(:disabled) {
+  background: var(--qlc-violet);
+  border-color: var(--qlc-violet);
+  color: var(--qlc-accent-fg);
+}
+
+.qlc-testdata-empty {
+  padding: 24px;
+  text-align: center;
+  color: var(--qlc-fg-muted);
+  font-size: 11px;
+}
+
+.qlc-testdata-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-top: 1px solid var(--qlc-border);
+  background: var(--qlc-bg-alt);
+  font-size: 10px;
+  color: var(--qlc-fg-muted);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.qlc-testdata-legend {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.qlc-testdata-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.qlc-testdata-legend-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.qlc-testdata-legend-dot-realistic { background: var(--qlc-accent); }
+.qlc-testdata-legend-dot-edge      { background: var(--qlc-cyan); }
+.qlc-testdata-legend-dot-invalid   { background: var(--qlc-rose); }
+
+@media (max-width: 700px) {
+  .qlc-testdata-table thead th,
+  .qlc-testdata-table td {
+    padding: 4px 6px;
+  }
+  .qlc-testdata-value {
+    font-size: 10.5px;
+  }
+}
