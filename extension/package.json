@@ -7,8 +7,12 @@
   "scripts": {
     "dev": "vite build --watch",
     "build": "node scripts/build.mjs",
+    "build:chrome": "node scripts/build.mjs --target=chrome",
+    "build:edge": "node scripts/build.mjs --target=edge",
     "package": "node scripts/package.mjs",
-    "release": "npm run build && npm run package",
+    "package:chrome": "node scripts/package.mjs --target=chrome",
+    "package:edge": "node scripts/package.mjs --target=edge",
+    "release": "npm run build:chrome && npm run build:edge && npm run package:chrome && npm run package:edge",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },

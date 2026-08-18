@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Download, BookOpen, ChevronDown } from 'lucide-react';
-import { VERSION, ZIP_PATH } from '@/lib/version';
+import { VERSION, CHROME_ZIP_PATH, EDGE_ZIP_PATH } from '@/lib/version';
 
 export function Hero() {
   return (
@@ -19,16 +19,20 @@ export function Hero() {
         <p className="text-xl md:text-2xl text-slate-700 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed">
           Fast Playwright, Selenium, Cypress, WebdriverIO and Robot Framework locators —
           <br className="hidden md:block" />
-          straight from Chrome DevTools.
+          straight from Chrome &amp; Edge DevTools.
         </p>
         <p className="text-base text-slate-500 dark:text-slate-400 mt-3 font-mono">
           $ snap → locator → paste → done.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-3 mt-10">
-          <a href={ZIP_PATH} download className="btn-primary text-base px-6 py-3">
+          <a href={CHROME_ZIP_PATH} download className="btn-primary text-base px-6 py-3">
             <Download className="w-5 h-5" />
-            Download v{VERSION}
+            Download for Chrome
+          </a>
+          <a href={EDGE_ZIP_PATH} download className="btn-outline text-base px-6 py-3">
+            <Download className="w-5 h-5" />
+            Download for Edge
           </a>
           <Link to="/install" className="btn-outline text-base px-6 py-3">
             <BookOpen className="w-5 h-5" />

@@ -8,7 +8,15 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
-const dist = resolve(root, 'dist');
+
+// --target=chrome (default) | --target=edge
+const target = (process.argv.find((a) => a.startsWith('--target=')) ?? '--target=chrome').split('=')[1];
+if (!['chrome', 'edge'].includes(target)) {
+  console.error(`[build] unknown target "${target}" — use --target=chrome or --target=edge`);
+  process.exit(1);
+}
+
+const dist = resolve(root, 'dist', target);
 
 async function clean() {
   if (existsSync(dist)) await rm(dist, { recursive: true });
@@ -18,7 +26,15 @@ async function clean() {
 }
 
 async function buildPanel() {
-  await viteBuild({ root, configFile: resolve(root, 'vite.config.ts') });
+  await viteBuild({
+    root,
+    configFile: resolve(root, 'vite.config.ts'),
+    build: {
+      outDir: dist,
+      // copyStatic() handles public/ manually — don't let vite duplicate it
+      publicDir: false,
+    },
+  });
 }
 
 async function buildBundle(entry, outfile, format) {
@@ -36,7 +52,8 @@ async function buildBundle(entry, outfile, format) {
 
 async function copyStatic() {
   const pub = resolve(root, 'public');
-  await copyFile(resolve(pub, 'manifest.json'), resolve(dist, 'manifest.json'));
+  const manifestSrc = target === 'edge' ? resolve(pub, 'manifest.edge.json') : resolve(pub, 'manifest.json');
+  await copyFile(manifestSrc, resolve(dist, 'manifest.json'));
   await copyFile(resolve(root, 'src/content/content.css'), resolve(dist, 'content.css'));
   if (existsSync(resolve(root, 'src/content/freeze.css'))) {
     await copyFile(resolve(root, 'src/content/freeze.css'), resolve(dist, 'freeze.css'));
@@ -102,7 +119,7 @@ async function main() {
   console.log('[build] rewriting HTML paths');
   await rewriteHtmlPaths();
 
-  console.log('[build] done → dist/');
+  console.log(`[build] done → dist/${target}/`);
 }
 
 main().catch((e) => {

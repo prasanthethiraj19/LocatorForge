@@ -7,11 +7,19 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
-const dist = resolve(root, 'dist');
+
+// --target=chrome (default) | --target=edge
+const target = (process.argv.find((a) => a.startsWith('--target=')) ?? '--target=chrome').split('=')[1];
+if (!['chrome', 'edge'].includes(target)) {
+  console.error(`[package] unknown target "${target}" — use --target=chrome or --target=edge`);
+  process.exit(1);
+}
+
+const dist = resolve(root, 'dist', target);
 
 async function main() {
   if (!existsSync(dist)) {
-    console.error('[package] dist/ missing — run `npm run build` first');
+    console.error(`[package] dist/${target}/ missing — run \`npm run build -- --target=${target}\` first`);
     process.exit(1);
   }
 
@@ -21,7 +29,7 @@ async function main() {
   const outDir = resolve(root, '..', 'website', 'public', 'downloads');
   await mkdir(outDir, { recursive: true });
 
-  const outFile = resolve(outDir, `${name}-v${version}.zip`);
+  const outFile = resolve(outDir, `${name}-${target}-v${version}.zip`);
   const stream = createWriteStream(outFile);
   const archive = archiver('zip', { zlib: { level: 9 } });
 

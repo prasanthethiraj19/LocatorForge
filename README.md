@@ -1,10 +1,11 @@
 # LocatorForge
 
-> Fast Chrome DevTools extension that generates Playwright, Selenium, Cypress, WebdriverIO and Robot Framework locators — straight from any element on a page. No ads. No tracking. No BS.
+> Fast Chrome & Edge DevTools extension that generates Playwright, Selenium, Cypress, WebdriverIO and Robot Framework locators — straight from any element on a page. No ads. No tracking. No BS.
 
 [![Free](https://img.shields.io/badge/Free-Forever-10b981)](https://locatorforge.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](./LICENSE)
 [![Version](https://img.shields.io/badge/version-0.8.0-emerald)](./extension/package.json)
+[![Browsers](https://img.shields.io/badge/browsers-Chrome%20%26%20Edge-blue)](https://locatorforge.com)
 
 **Live site:** [locatorforge.com](https://locatorforge.com)
 
@@ -12,7 +13,7 @@
 
 ## What it does
 
-Open Chrome DevTools, click any element in the DOM tree (or use the pick mode), and LocatorForge produces a ranked list of test locators across 9 frameworks. Live match counts, stability ratings, parameterized smart patterns, self-healing chains, Selenium 4 relative locators, recorder, freeze mode, page-wide export — all in one DevTools tab.
+Open Chrome or Edge DevTools, click any element in the DOM tree (or use the pick mode), and LocatorForge produces a ranked list of test locators across 9 frameworks. Live match counts, stability ratings, parameterized smart patterns, self-healing chains, Selenium 4 relative locators, recorder, freeze mode, page-wide export — all in one DevTools tab.
 
 ## Architecture
 
@@ -118,7 +119,7 @@ flowchart TD
 
 ```
 locatorforge/
-├── extension/                      # Chrome MV3 extension source
+├── extension/                      # Chrome + Edge MV3 extension source
 │   ├── src/
 │   │   ├── devtools/               # devtools.ts — panel + Elements sidebar pane
 │   │   ├── panel/                  # React panel UI
@@ -134,12 +135,12 @@ locatorforge/
 │   │   │       └── messaging/      # port message types
 │   │   ├── content/                # content.ts (pick), freeze.ts, recorder.ts
 │   │   └── background/             # service-worker.ts (port relay, commands, contextMenus)
-│   ├── public/                     # manifest.json, sidepanel.html, icons
-│   └── scripts/                    # build.mjs + package.mjs
+│   ├── public/                     # manifest.json + manifest.edge.json, sidepanel.html, icons
+│   └── scripts/                    # build.mjs + package.mjs (--target=chrome|edge)
 └── website/                        # Marketing site (Vite + React + Tailwind)
     ├── src/
     └── public/
-        └── downloads/              # built extension zip lands here
+        └── downloads/              # built extension zips land here (chrome + edge)
 ```
 
 ## Quick start
@@ -149,14 +150,26 @@ locatorforge/
 ```bash
 cd extension
 npm install
-npm run build       # → extension/dist/
-npm run package     # zips dist/ → ../website/public/downloads/locatorforge-v{VERSION}.zip
+
+npm run build:chrome     # → extension/dist/chrome/
+npm run build:edge       # → extension/dist/edge/
+
+npm run package:chrome   # zips dist/chrome/ → ../website/public/downloads/locatorforge-chrome-v{VERSION}.zip
+npm run package:edge     # zips dist/edge/   → ../website/public/downloads/locatorforge-edge-v{VERSION}.zip
+
+npm run release          # build + package both browsers in one go
 ```
 
 Load unpacked in Chrome:
 
 1. `chrome://extensions` → Developer mode on
-2. Load unpacked → select `extension/dist/`
+2. Load unpacked → select `extension/dist/chrome/`
+3. Open any page → F12 → **LocatorForge** tab (or pin the LocatorForge sidebar inside Elements)
+
+Load unpacked in Edge:
+
+1. `edge://extensions` → Developer mode on (left sidebar)
+2. Load unpacked → select `extension/dist/edge/`
 3. Open any page → F12 → **LocatorForge** tab (or pin the LocatorForge sidebar inside Elements)
 
 ### Website
@@ -196,11 +209,16 @@ Deploys to Vercel from the `website/` subdirectory.
 ### Surfaces
 - **Top-level DevTools panel** — full-width workflow
 - **Elements sidebar pane** — alongside Styles / Computed / Layout
-- **Chrome Side Panel API** — opens without DevTools (`⌘⇧L` or click toolbar icon)
+- **Chrome / Edge Side Panel API** — opens without DevTools (`⌘⇧L` or click toolbar icon)
+
+### Browser support
+- **Chrome 116+** and **Microsoft Edge 116+** (plus other Chromium browsers like Brave and Arc)
+- Separate `dist/chrome/` and `dist/edge/` builds, each with its own store-facing manifest
+- The website offers dedicated download buttons for Chrome and Edge builds
 
 ## Privacy
 
-Zero telemetry. Zero analytics. Zero remote calls. All settings live in `chrome.storage.sync` (your Chrome profile). The website itself uses no analytics, no cookies, no third-party scripts.
+Zero telemetry. Zero analytics. Zero remote calls. All settings live in `chrome.storage.sync` (your browser profile). The website itself uses no analytics, no cookies, no third-party scripts.
 
 Required permissions (and only these): `activeTab`, `scripting`, `storage`, `contextMenus`, `sidePanel`.
 

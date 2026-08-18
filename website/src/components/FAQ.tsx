@@ -16,16 +16,16 @@ const QUESTIONS = [
     a: 'Yes. LocatorForge auto-detects shadow root boundaries and iframe contexts. For Playwright it emits frameLocator() wrappers automatically. For other frameworks it provides matching idiomatic helpers.',
   },
   {
+    q: 'Which browsers are supported?',
+    a: 'Chrome and Microsoft Edge (plus other Chromium browsers like Brave and Arc). Grab the matching build from the download buttons — Firefox is on the roadmap.',
+  },
+  {
     q: 'Can I publish to the Chrome Web Store?',
     a: 'In progress. For now, load the .zip as an unpacked extension via chrome://extensions → Developer mode → Load unpacked. Takes 30 seconds.',
   },
   {
     q: 'Is the source code open?',
     a: 'Yes. Available on GitHub. Build it yourself, audit the code, fork it, contribute back.',
-  },
-  {
-    q: 'What about Firefox / Edge?',
-    a: 'Chrome / Chromium browsers are supported today (Brave, Arc, Edge Chromium). A Firefox port is on the roadmap.',
   },
 ];
 

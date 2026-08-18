@@ -1,46 +1,95 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Download, ArrowLeft } from 'lucide-react';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
-import { VERSION, ZIP_PATH } from '@/lib/version';
+import { VERSION, CHROME_ZIP_PATH, EDGE_ZIP_PATH } from '@/lib/version';
 
-const STEPS = [
-  {
-    title: 'Download the zip',
-    body: (
-      <>
-        Click the button below — saves <code className="text-sm bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">locatorforge-v{VERSION}.zip</code> (~73 KB).
-      </>
-    ),
-  },
-  { title: 'Unzip', body: 'Right-click the downloaded file → Extract / Unzip. Place the folder somewhere stable (e.g. ~/Tools/locatorforge/).' },
-  {
-    title: 'Open chrome://extensions',
-    body: (
-      <>
-        Paste <code className="text-sm bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">chrome://extensions</code> into Chrome's address bar.
-      </>
-    ),
-  },
-  {
-    title: 'Enable Developer mode',
-    body: 'Top-right corner — flip the Developer mode switch on.',
-  },
-  {
-    title: 'Click "Load unpacked"',
-    body: 'Top-left of the page. Browse to the unzipped folder and select it.',
-  },
-  {
-    title: 'Open DevTools',
-    body: (
-      <>
-        On any page press <kbd className="px-2 py-0.5 border rounded text-xs">F12</kbd> (or <kbd className="px-2 py-0.5 border rounded text-xs">Cmd</kbd>+<kbd className="px-2 py-0.5 border rounded text-xs">Opt</kbd>+<kbd className="px-2 py-0.5 border rounded text-xs">I</kbd>). Look for the <strong>LocatorForge</strong> tab — or open the Elements panel and find the LocatorForge sidebar.
-      </>
-    ),
-  },
+type Browser = 'chrome' | 'edge';
+
+const BROWSERS: { id: Browser; label: string; url: string; extensionsUrl: string }[] = [
+  { id: 'chrome', label: 'Chrome', url: 'chrome://extensions', extensionsUrl: 'Chrome' },
+  { id: 'edge', label: 'Edge', url: 'edge://extensions', extensionsUrl: 'Edge' },
 ];
 
+const STEPS: Record<Browser, { title: string; body: React.ReactNode }[]> = {
+  chrome: [
+    {
+      title: 'Download the zip',
+      body: (
+        <>
+          Click the Chrome button below — saves <code className="text-sm bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">locatorforge-chrome-v{VERSION}.zip</code>.
+        </>
+      ),
+    },
+    { title: 'Unzip', body: 'Right-click the downloaded file → Extract / Unzip. Place the folder somewhere stable (e.g. ~/Tools/locatorforge/).' },
+    {
+      title: 'Open chrome://extensions',
+      body: (
+        <>
+          Paste <code className="text-sm bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">chrome://extensions</code> into Chrome's address bar.
+        </>
+      ),
+    },
+    {
+      title: 'Enable Developer mode',
+      body: 'Top-right corner — flip the Developer mode switch on.',
+    },
+    {
+      title: 'Click "Load unpacked"',
+      body: 'Top-left of the page. Browse to the unzipped folder and select it.',
+    },
+    {
+      title: 'Open DevTools',
+      body: (
+        <>
+          On any page press <kbd className="px-2 py-0.5 border rounded text-xs">F12</kbd> (or <kbd className="px-2 py-0.5 border rounded text-xs">Cmd</kbd>+<kbd className="px-2 py-0.5 border rounded text-xs">Opt</kbd>+<kbd className="px-2 py-0.5 border rounded text-xs">I</kbd>). Look for the <strong>LocatorForge</strong> tab — or open the Elements panel and find the LocatorForge sidebar.
+        </>
+      ),
+    },
+  ],
+  edge: [
+    {
+      title: 'Download the zip',
+      body: (
+        <>
+          Click the Edge button below — saves <code className="text-sm bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">locatorforge-edge-v{VERSION}.zip</code>.
+        </>
+      ),
+    },
+    { title: 'Unzip', body: 'Right-click the downloaded file → Extract / Unzip. Place the folder somewhere stable (e.g. ~/Tools/locatorforge/).' },
+    {
+      title: 'Open edge://extensions',
+      body: (
+        <>
+          Paste <code className="text-sm bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">edge://extensions</code> into Edge's address bar.
+        </>
+      ),
+    },
+    {
+      title: 'Enable Developer mode',
+      body: 'Left sidebar — flip the Developer mode switch on.',
+    },
+    {
+      title: 'Click "Load unpacked"',
+      body: 'Top-left of the page. Browse to the unzipped folder and select it.',
+    },
+    {
+      title: 'Open DevTools',
+      body: (
+        <>
+          On any page press <kbd className="px-2 py-0.5 border rounded text-xs">F12</kbd> (or <kbd className="px-2 py-0.5 border rounded text-xs">Cmd</kbd>+<kbd className="px-2 py-0.5 border rounded text-xs">Opt</kbd>+<kbd className="px-2 py-0.5 border rounded text-xs">I</kbd>). Look for the <strong>LocatorForge</strong> tab — or open the Elements panel and find the LocatorForge sidebar.
+        </>
+      ),
+    },
+  ],
+};
+
 export default function Install() {
+  const [browser, setBrowser] = useState<Browser>('chrome');
+  const current = BROWSERS.find((b) => b.id === browser)!;
+  const zipPath = browser === 'chrome' ? CHROME_ZIP_PATH : EDGE_ZIP_PATH;
+
   return (
     <>
       <Nav />
@@ -54,13 +103,29 @@ export default function Install() {
           Two minutes. No account. Free forever.
         </p>
 
-        <a href={ZIP_PATH} download className="btn-primary text-base px-6 py-3 mb-10">
+        <div className="flex gap-3 mb-8">
+          {BROWSERS.map((b) => (
+            <button
+              key={b.id}
+              onClick={() => setBrowser(b.id)}
+              className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors border ${
+                browser === b.id
+                  ? 'bg-emerald-600 text-white border-emerald-600'
+                  : 'bg-transparent text-slate-600 dark:text-slate-300 border-slate-300 dark:border-zinc-700 hover:border-emerald-500 hover:text-emerald-600'
+              }`}
+            >
+              {b.label}
+            </button>
+          ))}
+        </div>
+
+        <a href={zipPath} download className="btn-primary text-base px-6 py-3 mb-10">
           <Download className="w-5 h-5" />
-          Download v{VERSION} (zip)
+          Download v{VERSION} for {current.label} (zip)
         </a>
 
         <ol className="space-y-6">
-          {STEPS.map((s, i) => (
+          {STEPS[browser].map((s, i) => (
             <li key={s.title} className="flex gap-4">
               <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-600 text-white text-sm font-semibold inline-flex items-center justify-center">
                 {i + 1}
