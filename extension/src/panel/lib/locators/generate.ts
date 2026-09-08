@@ -14,8 +14,37 @@ export function generateCandidates(el: SerializedElement, opts: GenerateOptions)
 
   const role = inferRole(el.tag, el.attrs);
   const name = computeAccessibleName(el);
-  if (role) {
-    raw.push(make('role', 1, { role, name: name || undefined }, undefined, role && name ? `role=${role}, name="${truncate(name, 30)}"` : `role=${role}`));
+  const roleCandidate = role ? make('role', 1, { role, name: name || undefined }, undefined, role && name ? `role=${role}, name="${truncate(name, 30)}"` : `role=${role}`) : null;
+  if (roleCandidate) raw.push(roleCandidate);
+
+  // role + nth disambiguator — when several elements share role/name, Playwright's
+  // "other locators" guidance is to pick by index: getByRole(...).nth(k).
+  if (roleCandidate && el.roleIndex >= 0) {
+    raw.push(
+      make(
+        'role-nth',
+        1,
+        { role, name: name || undefined, index: String(el.roleIndex) },
+        undefined,
+        `role=${role}${name ? `, name="${truncate(name, 30)}"` : ''} → nth(${el.roleIndex})`,
+      ),
+    );
+  }
+
+  // Scoped role strategy — role+name restricted to a unique container.
+  // Follows the "scope with an ancestor" convention used across all
+  // automation frameworks when a bare role/name is not unique.
+  if (roleCandidate && el.uniqueTextAnchor) {
+    const anchorSel = el.uniqueTextAnchor.selector;
+    raw.push(
+      make(
+        'scoped-role',
+        1,
+        { anchor: anchorSel, anchorXPath: el.uniqueTextAnchor.xpath || '', role, name: name || undefined },
+        undefined,
+        `${anchorSel} → role=${role}${name ? `, name="${truncate(name, 30)}"` : ''}`,
+      ),
+    );
   }
 
   const idAttr = el.attrs.id;
@@ -37,6 +66,22 @@ export function generateCandidates(el: SerializedElement, opts: GenerateOptions)
   const text = collapseWhitespace(el.visibleText || '');
   if (text && text.length > 0 && text.length < 80) {
     raw.push(make('text', 4, { value: truncate(text, 60) }, undefined, `By text "${truncate(text, 25)}"`));
+    // text + nth disambiguator — when several elements share the same text, pick
+    // the exact one by document-order index (Playwright "other locators" guide).
+    if (el.textIndex >= 0) {
+      raw.push(
+        make(
+          'text-nth',
+          4,
+          { value: truncate(text, 60), index: String(el.textIndex) },
+          undefined,
+          `text "${truncate(text, 25)}" → nth(${el.textIndex})`,
+        ),
+      );
+    }
+    // Generate scoped text locator using ancestor anchor for better specificity
+    const scoped = generateScopedText(el, text);
+    if (scoped) raw.push(scoped);
   }
 
   if (el.labelText) raw.push(make('label', 5, { value: collapseWhitespace(el.labelText) }, undefined, `Label "${truncate(el.labelText, 25)}"`));
@@ -75,6 +120,23 @@ export function generateCandidates(el: SerializedElement, opts: GenerateOptions)
   }
 
   return raw;
+}
+
+/**
+ * Generates a scoped text locator that chains the element's text with a unique
+ * ancestor anchor. This provides better specificity when plain text matches
+ * multiple elements on the page.
+ */
+function generateScopedText(el: SerializedElement, text: string): Candidate | null {
+  const anchor = el.uniqueTextAnchor;
+  if (!anchor) return null;
+  return make(
+    'scoped-text',
+    5,
+    { anchor: anchor.selector, anchorXPath: anchor.xpath, value: text },
+    undefined,
+    `${anchor.selector} → text "${truncate(text, 25)}"`,
+  );
 }
 
 function make(
@@ -128,8 +190,39 @@ export function buildCountSnippet(c: Candidate, opts: GenerateOptions): string {
   switch (c.kind) {
     case 'role':
       return countRole(c.args.role || '', c.args.name || '');
+    case 'role-nth': {
+      // Disambiguated by index: matches exactly 1 when that index exists.
+      const roleArg = c.args.role || '';
+      const nameArg = c.args.name || '';
+      const index = Number(c.args.index);
+      const sel = roleSelectorFallback(roleArg);
+      if (!nameArg) {
+        return `(function(){try{var els=document.querySelectorAll(${JSON.stringify(sel)});return els.length>${index}?1:0}catch(e){return 0}})()`;
+      }
+      return `(function(){try{var q=${JSON.stringify(nameArg.toLowerCase())};var els=document.querySelectorAll(${JSON.stringify(sel)});var c=0;for(var i=0;i<els.length;i++){var e=els[i];var t=((e.textContent||'')+' '+(e.getAttribute('aria-label')||'')+' '+(e.getAttribute('alt')||'')+' '+(e.getAttribute('title')||'')+' '+(e.getAttribute('placeholder')||'')+' '+(e.getAttribute('value')||'')).replace(/\\s+/g,' ').trim().toLowerCase();if(t===q){if(c===${index})return 1;c++}}return 0}catch(e){return 0}})()`;
+    }
+    case 'scoped-role': {
+      const anchor = c.args.anchor || '';
+      const roleArg = c.args.role || '';
+      const nameArg = c.args.name || '';
+      const sel = roleSelectorFallback(roleArg);
+      if (!nameArg) {
+        return `(function(){try{var n=0;document.querySelectorAll(${JSON.stringify(anchor)}).forEach(function(scope){n+=scope.querySelectorAll(${JSON.stringify(sel)}).length});return n}catch(e){return 0}})()`;
+      }
+      return `(function(){try{var n=0;var q=${JSON.stringify(nameArg.toLowerCase())};document.querySelectorAll(${JSON.stringify(anchor)}).forEach(function(scope){scope.querySelectorAll(${JSON.stringify(sel)}).forEach(function(e){var t=((e.textContent||'')+' '+(e.getAttribute('aria-label')||'')+' '+(e.getAttribute('alt')||'')+' '+(e.getAttribute('title')||'')+' '+(e.getAttribute('placeholder')||'')+' '+(e.getAttribute('value')||'')).replace(/\\s+/g,' ').trim().toLowerCase();if(t===q)n++})});return n}catch(e){return 0}})()`;
+    }
     case 'text':
       return countText(c.args.value || '');
+    case 'text-nth': {
+      const value = c.args.value || '';
+      const index = Number(c.args.index);
+      return `(function(){try{var q=${JSON.stringify(value.toLowerCase())};var n=0;var els=document.querySelectorAll('*');for(var i=0;i<els.length;i++){var e=els[i];var t='';e.childNodes.forEach(function(c){if(c.nodeType===3)t+=c.textContent||''});t=t.replace(/\\s+/g,' ').trim().toLowerCase();if(t===q){if(n===${index})return 1;n++}}return 0}catch(e){return 0}})()`;
+    }
+    case 'scoped-text': {
+      const anchor = c.args.anchor || '';
+      const value = c.args.value || '';
+      return `(function(){try{var s=document.querySelectorAll(${JSON.stringify(anchor)});var n=0;var q=${JSON.stringify(value.toLowerCase())};s.forEach(function(scope){scope.querySelectorAll('*').forEach(function(e){var t='';e.childNodes.forEach(function(c){if(c.nodeType===3)t+=c.textContent||''});t=t.replace(/\\s+/g,' ').trim().toLowerCase();if(t===q)n++})});return n}catch(e){return 0}})()`;
+    }
     case 'label':
       return countLabel(c.args.value || '');
     case 'placeholder':
@@ -199,7 +292,7 @@ function countRole(role: string, name: string): string {
   if (!name) {
     return `(function(){try{return document.querySelectorAll(${JSON.stringify(sel)}).length}catch(e){return 0}})()`;
   }
-  return `(function(){try{var n=${JSON.stringify(name.toLowerCase())};var els=document.querySelectorAll(${JSON.stringify(sel)});var c=0;els.forEach(function(e){var t=((e.textContent||'')+' '+(e.getAttribute('aria-label')||'')+' '+(e.getAttribute('alt')||'')+' '+(e.getAttribute('title')||'')+' '+(e.getAttribute('placeholder')||'')+' '+(e.getAttribute('value')||'')).toLowerCase();if(t.indexOf(n)!==-1)c++});return c}catch(e){return 0}})()`;
+  return `(function(){try{var n=${JSON.stringify(name.toLowerCase())};var els=document.querySelectorAll(${JSON.stringify(sel)});var c=0;els.forEach(function(e){var t=((e.textContent||'')+' '+(e.getAttribute('aria-label')||'')+' '+(e.getAttribute('alt')||'')+' '+(e.getAttribute('title')||'')+' '+(e.getAttribute('placeholder')||'')+' '+(e.getAttribute('value')||'')).replace(/\\s+/g,' ').trim().toLowerCase();if(t===n)c++});return c}catch(e){return 0}})()`;
 }
 
 function roleSelectorFallback(role: string): string {

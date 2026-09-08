@@ -47,8 +47,36 @@ function snippetSelector(c: Candidate, testIdAttr: string): string {
   switch (c.kind) {
     case 'role':
       return `var sel='${roleSelectorFor(c.args.role || '')}';return Array.from(document.querySelectorAll(sel));`;
+    case 'role-nth': {
+      const sel = roleSelectorFor(c.args.role || '');
+      const idx = Number(c.args.index || '0');
+      const name = c.args.name;
+      if (name) {
+        const q = JSON.stringify(name.toLowerCase());
+        return `var q=${q};var c=0;var out=[];Array.from(document.querySelectorAll(${JSON.stringify(sel)})).forEach(function(e){var t=((e.textContent||'')+' '+(e.getAttribute('aria-label')||'')+' '+(e.getAttribute('alt')||'')+' '+(e.getAttribute('title')||'')+' '+(e.getAttribute('placeholder')||'')+' '+(e.getAttribute('value')||'')).replace(/\\s+/g,' ').trim().toLowerCase();if(t===q){if(c===${idx})out.push(e);c++}});return out;`;
+      }
+      return `var all=Array.from(document.querySelectorAll(${JSON.stringify(sel)}));return all.length>${idx}?[all[${idx}]]:[];`;
+    }
+    case 'scoped-role': {
+      const a = c.args.anchor || '';
+      const sel = roleSelectorFor(c.args.role || '');
+      if (c.args.name) {
+        return `var q=${JSON.stringify((c.args.name || '').toLowerCase())};var out=[];document.querySelectorAll(${JSON.stringify(a)}).forEach(function(scope){scope.querySelectorAll(${JSON.stringify(sel)}).forEach(function(e){var t=((e.textContent||'')+' '+(e.getAttribute('aria-label')||'')+' '+(e.getAttribute('alt')||'')+' '+(e.getAttribute('title')||'')+' '+(e.getAttribute('placeholder')||'')+' '+(e.getAttribute('value')||'')).replace(/\\s+/g,' ').trim().toLowerCase();if(t===q)out.push(e)})});return out;`;
+      }
+      return `var out=[];document.querySelectorAll(${JSON.stringify(a)}).forEach(function(scope){out.push.apply(out,Array.from(scope.querySelectorAll(${JSON.stringify(sel)})))});return out;`;
+    }
     case 'text':
       return `var q=${JSON.stringify((c.args.value || '').toLowerCase())};return Array.from(document.querySelectorAll('*')).filter(function(e){var t='';e.childNodes.forEach(function(c){if(c.nodeType===3)t+=c.textContent||''});return t.replace(/\\s+/g,' ').trim().toLowerCase().indexOf(q)!==-1;});`;
+    case 'text-nth': {
+      const v = JSON.stringify((c.args.value || '').toLowerCase());
+      const idx = Number(c.args.index || '0');
+      return `var q=${v};var n=0;var out=[];Array.from(document.querySelectorAll('*')).forEach(function(e){var t='';e.childNodes.forEach(function(c){if(c.nodeType===3)t+=c.textContent||''});t=t.replace(/\\s+/g,' ').trim().toLowerCase();if(t===q){if(n===${idx})out.push(e);n++}});return out;`;
+    }
+    case 'scoped-text': {
+      const a = c.args.anchor || '';
+      const v = JSON.stringify((c.args.value || '').toLowerCase());
+      return `var q=${v};var out=[];document.querySelectorAll(${JSON.stringify(a)}).forEach(function(scope){scope.querySelectorAll('*').forEach(function(e){var t='';e.childNodes.forEach(function(c){if(c.nodeType===3)t+=c.textContent||''});t=t.replace(/\\s+/g,' ').trim().toLowerCase();if(t===q)out.push(e)})});return out;`;
+    }
     case 'label':
       return `var q=${JSON.stringify((c.args.value || '').toLowerCase())};var out=[];Array.from(document.querySelectorAll('label')).forEach(function(l){var t=(l.textContent||'').replace(/\\s+/g,' ').trim().toLowerCase();if(t.indexOf(q)===-1)return;var f=l.getAttribute('for');if(f){var x=document.getElementById(f);if(x)out.push(x)}else{var inp=l.querySelector('input,textarea,select');if(inp)out.push(inp)}});return out;`;
     case 'placeholder':

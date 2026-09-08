@@ -12,6 +12,9 @@ export default defineConfig({
     target: 'chrome116',
     minify: 'esbuild',
     sourcemap: false,
+    // Chrome 116+ has native modulepreload; the injected polyfill triggers
+    // "cross-world extension resource mismatch" warnings in extension pages.
+    modulePreload: { polyfill: false },
     rollupOptions: {
       input: {
         devtools: resolve(__dirname, 'src/devtools/devtools.html'),

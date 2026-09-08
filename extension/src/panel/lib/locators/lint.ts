@@ -82,15 +82,17 @@ export function lintCandidate(c: Candidate): LintFinding[] {
     });
   }
 
-  if (!c.isUnique && c.matchCount > 1) {
+  // nth-pinned candidates resolve to exactly one match by construction, so the
+  // generic "not unique" warning does not apply to them.
+  if (!c.isUnique && c.matchCount > 1 && c.kind !== 'role-nth' && c.kind !== 'text-nth') {
     out.push({
       rule: 'not-unique',
       severity: c.matchCount > 5 ? 'warn' : 'info',
-      message: `Matches ${c.matchCount} elements — chain with .first() / .nth(i) or pick more specific anchor.`,
+      message: `Matches ${c.matchCount} elements — use the role·nth / text·nth entry above, or pick a more specific anchor.`,
     });
   }
 
-  if (c.matchCount === 0) {
+  if (c.matchCount === 0 && c.kind !== 'role-nth' && c.kind !== 'text-nth') {
     out.push({
       rule: 'no-match',
       severity: 'warn',

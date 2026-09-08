@@ -266,9 +266,14 @@ function toggle() {
   else enter();
 }
 
-chrome.runtime.onMessage.addListener((msg: FreezeMessage) => {
-  if (!msg || typeof msg.type !== 'string') return;
-  if (msg.type === 'FREEZE_ENTER') enter();
-  else if (msg.type === 'FREEZE_EXIT') exit();
-  else if (msg.type === 'FREEZE_TOGGLE') toggle();
-});
+// Register only once even if the SW re-injects this file (static content-script
+// registration + on-demand executeScript fallback can both load it).
+if (!(window as unknown as { __qlcFreezeLoaded?: boolean }).__qlcFreezeLoaded) {
+  (window as unknown as { __qlcFreezeLoaded: boolean }).__qlcFreezeLoaded = true;
+  chrome.runtime.onMessage.addListener((msg: FreezeMessage) => {
+    if (!msg || typeof msg.type !== 'string') return;
+    if (msg.type === 'FREEZE_ENTER') enter();
+    else if (msg.type === 'FREEZE_EXIT') exit();
+    else if (msg.type === 'FREEZE_TOGGLE') toggle();
+  });
+}

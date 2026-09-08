@@ -61,32 +61,44 @@ export function CodeSample() {
   const sample = SAMPLES.find((s) => s.id === active) || SAMPLES[0];
 
   return (
-    <section className="py-20">
-      <div className="max-w-5xl mx-auto px-6">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Copy-paste ready.</h2>
-          <p className="text-slate-600 dark:text-slate-400 mt-3">
-            Switch framework with one click. Output uses idiomatic patterns for the stack you picked.
+    <section className="border-y border-stone-200 bg-white py-20">
+      <div className="mx-auto max-w-5xl px-6">
+        <div className="mb-10 text-center">
+          <p className="kicker">One click per framework</p>
+          <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-stone-900 md:text-4xl">
+            Copy-paste ready.
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-stone-600">
+            Switch framework with one click. Output uses idiomatic patterns for the stack you
+            picked.
           </p>
         </div>
 
-        <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-800 shadow-sm">
-          <div className="flex items-center gap-1 bg-slate-100 dark:bg-zinc-900 px-2 py-1.5 border-b border-slate-200 dark:border-zinc-800 overflow-x-auto">
-            {SAMPLES.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => setActive(s.id)}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${
-                  active === s.id
-                    ? 'bg-white dark:bg-zinc-950 text-emerald-700 dark:text-emerald-400 shadow-sm'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-zinc-200'
-                }`}
-              >
-                {s.label}
-              </button>
-            ))}
+        <div className="overflow-hidden rounded-2xl border border-stone-800 shadow-panel">
+          <div className="flex items-center justify-between border-b border-white/5 bg-forge-950 px-4 py-2.5">
+            <div className="flex gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-300" />
+              <span className="h-2.5 w-2.5 rounded-full bg-ember-400" />
+            </div>
+            <div className="flex min-w-0 gap-1 overflow-x-auto">
+              {SAMPLES.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => setActive(s.id)}
+                  className={`whitespace-nowrap rounded-md px-3 py-1.5 font-mono text-xs transition-colors ${
+                    active === s.id
+                      ? 'bg-white/10 font-semibold text-ember-300'
+                      : 'text-stone-500 hover:text-stone-300'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+            <span className="hidden font-mono text-[10px] text-stone-500 sm:block">main.spec</span>
           </div>
-          <pre className="bg-zinc-950 text-zinc-100 p-6 overflow-x-auto text-sm leading-relaxed">
+          <pre className="overflow-x-auto bg-forge-950 p-6 font-mono text-sm leading-relaxed text-stone-200">
             <code>{sample.code}</code>
           </pre>
         </div>

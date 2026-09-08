@@ -177,8 +177,189 @@ function __qlcSerialize(el) {
     return null;
   }
 
+  function isUniqueSel(sel) {
+    try { return document.querySelectorAll(sel).length === 1; } catch (e) { return false; }
+  }
+
+  /**
+   * Finds the closest ancestor within which the given text is unique, and
+   * returns a selector for that ancestor that is GLOBALLY unique on the page.
+   * Prefers a stable, readable anchor (unique #id or a landmark whose tag
+   * selector is unique), otherwise falls back to a full structural CSS path
+   * (the same guaranteed-unique path used by the css fallback candidate).
+   */
+  function findClosestUniqueAnchor(node, text) {
+    if (!text) return null;
+    var targetText = text.toLowerCase().trim();
+    if (!targetText) return null;
+
+    function textMatchesWithin(cur) {
+      var matches = 0;
+      var children = cur.querySelectorAll('*');
+      for (var i = 0; i < children.length; i++) {
+        var el = children[i];
+        var dt = '';
+        var cn = el.childNodes;
+        for (var j = 0; j < cn.length; j++) {
+          if (cn[j].nodeType === 3) dt += cn[j].textContent || '';
+        }
+        dt = dt.replace(/\\s+/g, ' ').trim().toLowerCase();
+        if (dt === targetText) {
+          matches++;
+          if (matches > 1) return matches;
+        }
+      }
+      return matches;
+    }
+
+    var cur = node.parentElement;
+    var safety = 0;
+    while (cur && cur !== document.body && safety++ < 50) {
+      if (textMatchesWithin(cur) === 1) {
+        var sel = '';
+        var tag = cur.tagName.toLowerCase();
+        if (cur.id && isUniqueSel('#' + CSS.escape(cur.id))) {
+          sel = '#' + CSS.escape(cur.id);
+        } else {
+          var role = cur.getAttribute && cur.getAttribute('role');
+          var landmarkTag = tag === 'main' || tag === 'nav' || tag === 'form' || tag === 'header' || tag === 'footer' || tag === 'aside';
+          var landmarkRole = role === 'main' || role === 'navigation' || role === 'form' || role === 'dialog';
+          if (landmarkTag && isUniqueSel(tag)) {
+            sel = tag;
+          } else if (landmarkRole && isUniqueSel('[role=' + JSON.stringify(role) + ']')) {
+            sel = '[role=' + JSON.stringify(role) + ']';
+          } else {
+            // Guaranteed-unique structural path ending at this container.
+            var path = getCss(cur);
+            if (path) sel = path;
+          }
+        }
+        if (sel) return { selector: sel, xpath: getXPathStructural(cur), tag: tag };
+      }
+      cur = cur.parentElement;
+    }
+    return null;
+  }
+
   function visibleTextOf(node) {
     return (node.textContent || '').replace(/\\s+/g, ' ').trim();
+  }
+
+  // Direct-text normalization used to reproduce getByText exact matching.
+  function directTextOf(node) {
+    var dt = '';
+    for (var j = 0; j < node.childNodes.length; j++) {
+      var cn = node.childNodes[j];
+      if (cn.nodeType === 3) dt += cn.textContent || '';
+    }
+    return dt.replace(/\\s+/g, ' ').trim();
+  }
+
+  // Reproduces the selector fallback for a given implicit/explicit role so we
+  // can locate the same elements Playwright's role selector would match.
+  function roleSelectorFor(role) {
+    var map = {
+      button: 'button,input[type=button],input[type=submit],input[type=reset],input[type=image],[role=button]',
+      link: 'a[href],[role=link]',
+      textbox: 'input:not([type=button]):not([type=submit]):not([type=reset]):not([type=checkbox]):not([type=radio]):not([type=image]):not([type=range]):not([type=number]):not([type=search]),textarea,[role=textbox]',
+      checkbox: 'input[type=checkbox],[role=checkbox]',
+      radio: 'input[type=radio],[role=radio]',
+      searchbox: 'input[type=search],[role=searchbox]',
+      combobox: 'select,[role=combobox]',
+      heading: 'h1,h2,h3,h4,h5,h6,[role=heading]',
+      img: 'img,[role=img]',
+      list: 'ul,ol,menu,[role=list]',
+      listitem: 'li,[role=listitem]',
+      dialog: 'dialog,[role=dialog]',
+      tab: '[role=tab]',
+      tabpanel: '[role=tabpanel]',
+      navigation: 'nav,[role=navigation]',
+      main: 'main,[role=main]',
+      banner: 'header,[role=banner]',
+      contentinfo: 'footer,[role=contentinfo]',
+      form: 'form,[role=form]',
+      region: 'section,[role=region]',
+      table: 'table,[role=table]',
+      row: 'tr,[role=row]',
+      cell: 'td,[role=cell]',
+      columnheader: 'th,[role=columnheader]',
+      option: 'option,[role=option]',
+      slider: 'input[type=range],[role=slider]',
+      spinbutton: 'input[type=number],[role=spinbutton]',
+      progressbar: 'progress,[role=progressbar]',
+      separator: 'hr,[role=separator]'
+    };
+    return map[role] || '[role=' + JSON.stringify(role) + ']';
+  }
+
+  // Rough accessible-name proxy matching the panel's computeAccessibleName:
+  // aria-labelledby text → aria-label → label text → img alt → input value/placeholder → own visible text.
+  function elementNameFor(node, a) {
+    if (!a) a = attrs(node);
+    var labelledby = (a['aria-labelledby'] || '').split(/\\s+/).filter(Boolean);
+    if (labelledby.length) {
+      var parts = labelledby.map(function (id) {
+        var r = document.getElementById(id);
+        return r ? visibleTextOf(r) : '';
+      }).filter(Boolean);
+      if (parts.length) return parts.join(' ').replace(/\\s+/g, ' ').trim();
+    }
+    if (a['aria-label']) return String(a['aria-label']).replace(/\\s+/g, ' ').trim();
+    var lab = findLabelText(node);
+    if (lab) return lab;
+    var t = node.tagName.toLowerCase();
+    if (t === 'img' && a.alt) return String(a.alt).replace(/\\s+/g, ' ').trim();
+    if (t === 'input') {
+      var it = (a.type || 'text').toLowerCase();
+      if (it === 'submit' || it === 'reset' || it === 'button') return String(a.value || '').replace(/\\s+/g, ' ').trim();
+      if (it === 'image') return String(a.alt || '').replace(/\\s+/g, ' ').trim();
+      if (a.placeholder) return String(a.placeholder).replace(/\\s+/g, ' ').trim();
+      return '';
+    }
+    if (t === 'button' || /^h[1-6]$/.test(t) || t === 'a' || t === 'summary') {
+      var vis = (node.textContent || '').replace(/\\s+/g, ' ').trim();
+      return vis;
+    }
+    if (a.title) return String(a.title).replace(/\\s+/g, ' ').trim();
+    return '';
+  }
+
+  // 0-based index of el among all elements matching role+name in document order.
+  function roleMatchIndex(el, role, name, a) {
+    try {
+      var sel = roleSelectorFor(role);
+      var all = document.querySelectorAll(sel);
+      var idx = 0;
+      for (var i = 0; i < all.length; i++) {
+        if (!name) {
+          if (all[i] === el) return idx;
+          idx++;
+          continue;
+        }
+        var nm = elementNameFor(all[i]);
+        if (nm === name) {
+          if (all[i] === el) return idx;
+          idx++;
+        }
+      }
+      return -1;
+    } catch (e) { return -1; }
+  }
+
+  // 0-based index of el among all elements whose exact direct text equals text.
+  function textMatchIndex(el, text) {
+    try {
+      var all = document.querySelectorAll('*');
+      var idx = 0;
+      for (var i = 0; i < all.length; i++) {
+        var dt = directTextOf(all[i]);
+        if (dt && dt === text) {
+          if (all[i] === el) return idx;
+          idx++;
+        }
+      }
+      return -1;
+    } catch (e) { return -1; }
   }
 
   function findLabelText(node) {
@@ -224,6 +405,52 @@ function __qlcSerialize(el) {
   var frameChain = buildFrameChain();
   var anchor = findAncestorAnchor(el);
   var anchorOut = anchor ? { selector: anchor.selector, chain: anchor.selector } : null;
+  var uniqueTextAnchor = findClosestUniqueAnchor(el, directText || text);
+  var uniqueAnchorOut = uniqueTextAnchor ? { selector: uniqueTextAnchor.selector, xpath: uniqueTextAnchor.xpath, chain: uniqueTextAnchor.selector } : null;
+
+  // Match indexes (0-based) so we can emit .nth(k) disambiguators that the
+  // Playwright "other locators" guide recommends when several elements share
+  // the same role/text.
+  var explicitRole = a.role || '';
+  var inferredRole = '';
+  var tagn = tag;
+  if (tagn === 'a') inferredRole = 'link';
+  else if (tagn === 'button') inferredRole = 'button';
+  else if (tagn === 'img') inferredRole = 'img';
+  else if (tagn === 'input') {
+    var it2 = (a.type || 'text').toLowerCase();
+    if (it2 === 'button' || it2 === 'submit' || it2 === 'reset' || it2 === 'image') inferredRole = 'button';
+    else if (it2 === 'checkbox') inferredRole = 'checkbox';
+    else if (it2 === 'radio') inferredRole = 'radio';
+    else if (it2 === 'search') inferredRole = 'searchbox';
+    else if (it2 === 'number') inferredRole = 'spinbutton';
+    else inferredRole = 'textbox';
+  }
+  else if (/^h[1-6]$/.test(tagn)) inferredRole = 'heading';
+  else if (tagn === 'select') inferredRole = 'combobox';
+  else if (tagn === 'textarea') inferredRole = 'textbox';
+  else if (tagn === 'nav') inferredRole = 'navigation';
+  else if (tagn === 'main') inferredRole = 'main';
+  else if (tagn === 'header') inferredRole = 'banner';
+  else if (tagn === 'footer') inferredRole = 'contentinfo';
+  else if (tagn === 'form') inferredRole = 'form';
+  else if (tagn === 'table') inferredRole = 'table';
+  else if (tagn === 'tr') inferredRole = 'row';
+  else if (tagn === 'td') inferredRole = 'cell';
+  else if (tagn === 'th') inferredRole = 'columnheader';
+  else if (tagn === 'li') inferredRole = 'listitem';
+  else if (tagn === 'ul' || tagn === 'ol') inferredRole = 'list';
+  else if (tagn === 'option') inferredRole = 'option';
+  else if (tagn === 'section') inferredRole = 'region';
+  else if (tagn === 'aside') inferredRole = 'complementary';
+  else if (tagn === 'dialog') inferredRole = 'dialog';
+
+  var finalRole = explicitRole || inferredRole;
+  var accessName = elementNameFor(el, a);
+  var cleanText = directText || text;
+  var roleIdx = finalRole && accessName ? roleMatchIndex(el, finalRole, accessName, a) : -1;
+  var roleNoNameIdx = finalRole ? roleMatchIndex(el, finalRole, '', a) : -1;
+  var textIdx = cleanText ? textMatchIndex(el, cleanText) : -1;
 
   return {
     tag: tag,
@@ -243,6 +470,10 @@ function __qlcSerialize(el) {
     xpathAbsolute: getXPathAbsolute(el),
     xpathPosition: getXPathPosition(el),
     ancestorAnchor: anchorOut,
+    uniqueTextAnchor: uniqueAnchorOut,
+    roleIndex: roleIdx,
+    roleNoNameIndex: roleNoNameIdx,
+    textIndex: textIdx,
     shadowChain: shadowChain,
     frameChain: frameChain,
     isSvg: isSvg(el),

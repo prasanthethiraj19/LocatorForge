@@ -24,26 +24,34 @@ const QUESTIONS = [
     a: 'In progress. For now, load the .zip as an unpacked extension via chrome://extensions → Developer mode → Load unpacked. Takes 30 seconds.',
   },
   {
-    q: 'Is the source code open?',
-    a: 'Yes. Available on GitHub. Build it yourself, audit the code, fork it, contribute back.',
+    q: 'How do I get the extension?',
+    a: 'Download the Chrome or Edge build straight from this site. No account, no email, no store yet — the download buttons above give you the signed zip for your browser.',
   },
 ];
 
 export function FAQ() {
   return (
-    <section className="py-20">
-      <div className="max-w-3xl mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Questions.</h2>
+    <section className="border-t border-stone-200 bg-white py-20">
+      <div className="mx-auto max-w-3xl px-6">
+        <div className="mb-12 text-center">
+          <p className="kicker">FAQ</p>
+          <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-stone-900 md:text-4xl">
+            Questions.
+          </h2>
         </div>
         <div className="space-y-3">
           {QUESTIONS.map((item) => (
-            <details key={item.q} className="group card cursor-pointer">
-              <summary className="flex items-center justify-between font-semibold list-none">
+            <details
+              key={item.q}
+              className="group rounded-xl border border-stone-200 bg-white px-5 shadow-sm transition-colors open:border-ember-300 hover:border-stone-300"
+            >
+              <summary className="flex list-none cursor-pointer items-center justify-between gap-4 py-4 font-semibold text-stone-900 [&::-webkit-details-marker]:hidden">
                 <span>{item.q}</span>
-                <span className="text-emerald-600 group-open:rotate-45 transition-transform text-2xl leading-none">+</span>
+                <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-stone-300 bg-white font-mono text-sm font-bold text-stone-600 shadow-sm transition-all group-open:rotate-45 group-open:border-ember-600 group-open:bg-ember-600 group-open:text-white">
+                  +
+                </span>
               </summary>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-3 leading-relaxed">{item.a}</p>
+              <p className="pb-4 text-sm leading-relaxed text-stone-600">{item.a}</p>
             </details>
           ))}
         </div>

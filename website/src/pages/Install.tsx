@@ -18,7 +18,7 @@ const STEPS: Record<Browser, { title: string; body: React.ReactNode }[]> = {
       title: 'Download the zip',
       body: (
         <>
-          Click the Chrome button below — saves <code className="text-sm bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">locatorforge-chrome-v{VERSION}.zip</code>.
+          Click the Chrome button below — saves <code className="code-chip">locatorforge-chrome-v{VERSION}.zip</code>.
         </>
       ),
     },
@@ -27,7 +27,7 @@ const STEPS: Record<Browser, { title: string; body: React.ReactNode }[]> = {
       title: 'Open chrome://extensions',
       body: (
         <>
-          Paste <code className="text-sm bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">chrome://extensions</code> into Chrome's address bar.
+          Paste <code className="code-chip">chrome://extensions</code> into Chrome's address bar.
         </>
       ),
     },
@@ -43,7 +43,7 @@ const STEPS: Record<Browser, { title: string; body: React.ReactNode }[]> = {
       title: 'Open DevTools',
       body: (
         <>
-          On any page press <kbd className="px-2 py-0.5 border rounded text-xs">F12</kbd> (or <kbd className="px-2 py-0.5 border rounded text-xs">Cmd</kbd>+<kbd className="px-2 py-0.5 border rounded text-xs">Opt</kbd>+<kbd className="px-2 py-0.5 border rounded text-xs">I</kbd>). Look for the <strong>LocatorForge</strong> tab — or open the Elements panel and find the LocatorForge sidebar.
+          On any page press <kbd className="rounded border border-stone-300 px-2 py-0.5 font-mono text-xs">F12</kbd> (or <kbd className="rounded border border-stone-300 px-2 py-0.5 font-mono text-xs">Cmd</kbd>+<kbd className="rounded border border-stone-300 px-2 py-0.5 font-mono text-xs">Opt</kbd>+<kbd className="rounded border border-stone-300 px-2 py-0.5 font-mono text-xs">I</kbd>). Look for the <strong>LocatorForge</strong> tab — or open the Elements panel and find the LocatorForge sidebar.
         </>
       ),
     },
@@ -53,7 +53,7 @@ const STEPS: Record<Browser, { title: string; body: React.ReactNode }[]> = {
       title: 'Download the zip',
       body: (
         <>
-          Click the Edge button below — saves <code className="text-sm bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">locatorforge-edge-v{VERSION}.zip</code>.
+          Click the Edge button below — saves <code className="code-chip">locatorforge-edge-v{VERSION}.zip</code>.
         </>
       ),
     },
@@ -62,7 +62,7 @@ const STEPS: Record<Browser, { title: string; body: React.ReactNode }[]> = {
       title: 'Open edge://extensions',
       body: (
         <>
-          Paste <code className="text-sm bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">edge://extensions</code> into Edge's address bar.
+          Paste <code className="code-chip">edge://extensions</code> into Edge's address bar.
         </>
       ),
     },
@@ -78,7 +78,7 @@ const STEPS: Record<Browser, { title: string; body: React.ReactNode }[]> = {
       title: 'Open DevTools',
       body: (
         <>
-          On any page press <kbd className="px-2 py-0.5 border rounded text-xs">F12</kbd> (or <kbd className="px-2 py-0.5 border rounded text-xs">Cmd</kbd>+<kbd className="px-2 py-0.5 border rounded text-xs">Opt</kbd>+<kbd className="px-2 py-0.5 border rounded text-xs">I</kbd>). Look for the <strong>LocatorForge</strong> tab — or open the Elements panel and find the LocatorForge sidebar.
+          On any page press <kbd className="rounded border border-stone-300 px-2 py-0.5 font-mono text-xs">F12</kbd> (or <kbd className="rounded border border-stone-300 px-2 py-0.5 font-mono text-xs">Cmd</kbd>+<kbd className="rounded border border-stone-300 px-2 py-0.5 font-mono text-xs">Opt</kbd>+<kbd className="rounded border border-stone-300 px-2 py-0.5 font-mono text-xs">I</kbd>). Look for the <strong>LocatorForge</strong> tab — or open the Elements panel and find the LocatorForge sidebar.
         </>
       ),
     },
@@ -93,25 +93,23 @@ export default function Install() {
   return (
     <>
       <Nav />
-      <div className="max-w-3xl mx-auto px-6 py-16">
-        <Link to="/" className="inline-flex items-center text-sm text-emerald-700 hover:underline mb-6">
-          <ArrowLeft className="w-4 h-4 mr-1" />
+      <div className="mx-auto max-w-3xl px-6 py-16">
+        <Link to="/" className="mb-6 inline-flex items-center text-sm font-medium text-ember-700 hover:underline">
+          <ArrowLeft className="mr-1 h-4 w-4" />
           Back home
         </Link>
-        <h1 className="text-4xl font-bold tracking-tight mb-3">Install LocatorForge</h1>
-        <p className="text-slate-600 dark:text-slate-400 mb-8">
-          Two minutes. No account. Free forever.
-        </p>
+        <h1 className="text-4xl font-extrabold tracking-tight text-stone-900">Install LocatorForge</h1>
+        <p className="mb-8 mt-2 text-stone-600">Two minutes. No account. Free forever.</p>
 
-        <div className="flex gap-3 mb-8">
+        <div className="mb-8 flex gap-3">
           {BROWSERS.map((b) => (
             <button
               key={b.id}
               onClick={() => setBrowser(b.id)}
-              className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors border ${
+              className={`rounded-lg border px-5 py-2.5 text-sm font-semibold transition-colors ${
                 browser === b.id
-                  ? 'bg-emerald-600 text-white border-emerald-600'
-                  : 'bg-transparent text-slate-600 dark:text-slate-300 border-slate-300 dark:border-zinc-700 hover:border-emerald-500 hover:text-emerald-600'
+                  ? 'border-ember-600 bg-ember-600 text-white shadow-sm'
+                  : 'border-stone-300 bg-white text-stone-600 hover:border-ember-500 hover:text-ember-700'
               }`}
             >
               {b.label}
@@ -119,28 +117,28 @@ export default function Install() {
           ))}
         </div>
 
-        <a href={zipPath} download className="btn-primary text-base px-6 py-3 mb-10">
-          <Download className="w-5 h-5" />
+        <a href={zipPath} download className="btn-primary mb-10 px-6 py-3 text-base">
+          <Download className="h-5 w-5" />
           Download v{VERSION} for {current.label} (zip)
         </a>
 
         <ol className="space-y-6">
           {STEPS[browser].map((s, i) => (
             <li key={s.title} className="flex gap-4">
-              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-600 text-white text-sm font-semibold inline-flex items-center justify-center">
+              <span className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-ember-500 to-ember-700 text-sm font-bold text-white">
                 {i + 1}
               </span>
               <div>
-                <h3 className="font-semibold text-base">{s.title}</h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">{s.body}</p>
+                <h3 className="font-bold text-stone-900">{s.title}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-stone-600">{s.body}</p>
               </div>
             </li>
           ))}
         </ol>
 
-        <div className="mt-12 p-5 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900">
-          <h3 className="font-semibold text-emerald-800 dark:text-emerald-300">Tip</h3>
-          <p className="text-sm text-emerald-900 dark:text-emerald-200 mt-1">
+        <div className="mt-12 rounded-xl border border-ember-200 bg-ember-50/70 p-5">
+          <h3 className="font-bold text-ember-800">Tip</h3>
+          <p className="mt-1 text-sm text-ember-900">
             Pin LocatorForge's sidebar inside the Elements panel — locators auto-update every time you click an element in the DOM tree. No tab switching needed.
           </p>
         </div>

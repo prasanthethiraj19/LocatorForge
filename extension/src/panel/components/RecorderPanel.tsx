@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { FrameworkDef } from '../lib/locators/types';
 import type { RecordedStep } from '../lib/recorder/types';
-import { emitAll, buildTestFile, defaultFilename } from '../lib/recorder/recorder';
+import { emitAll, buildTestFile, buildPomFile, defaultFilename, defaultPomFilename } from '../lib/recorder/recorder';
 
 export interface RecorderPanelProps {
   open: boolean;
@@ -43,16 +43,19 @@ export function RecorderPanel({
   onClose,
 }: RecorderPanelProps) {
   const [copied, setCopied] = useState(false);
+  const [shape, setShape] = useState<'test' | 'pom'>('test');
 
   const emitted = useMemo(
     () => emitAll(steps, framework, testIdAttribute),
     [steps, framework, testIdAttribute],
   );
 
-  const code = useMemo(
-    () => buildTestFile(steps, framework, testIdAttribute),
-    [steps, framework, testIdAttribute],
-  );
+  const code = useMemo(() => {
+    if (!steps.length) return '';
+    return shape === 'pom'
+      ? buildPomFile(steps, framework, testIdAttribute)
+      : buildTestFile(steps, framework, testIdAttribute);
+  }, [steps, framework, testIdAttribute, shape]);
 
   if (!open) return null;
 
@@ -65,7 +68,8 @@ export function RecorderPanel({
   }
 
   function handleDownload() {
-    const filename = defaultFilename(framework);
+    const filename =
+      shape === 'pom' ? defaultPomFilename(framework) : defaultFilename(framework);
     const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -132,7 +136,27 @@ export function RecorderPanel({
           {steps.length > 0 && (
             <div className="qlc-rec-code-wrap">
               <div className="qlc-rec-code-head">
-                <span>Generated test ({framework.label})</span>
+                <span>
+                  {shape === 'pom'
+                    ? `Page object · ${framework.label}`
+                    : `Generated test · ${framework.label}`}
+                </span>
+                <div className="qlc-rec-shape">
+                  <button
+                    type="button"
+                    className={`qlc-btn ${shape === 'test' ? 'qlc-btn-primary' : ''}`}
+                    onClick={() => setShape('test')}
+                  >
+                    Test
+                  </button>
+                  <button
+                    type="button"
+                    className={`qlc-btn ${shape === 'pom' ? 'qlc-btn-primary' : ''}`}
+                    onClick={() => setShape('pom')}
+                  >
+                    Page object
+                  </button>
+                </div>
               </div>
               <pre className="qlc-rec-code"><code>{code}</code></pre>
             </div>
@@ -328,12 +352,26 @@ function RecorderStyles() {
         min-height: 0;
       }
       .qlc-rec-code-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
         padding: 6px 12px;
         font-size: 10px;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         color: var(--qlc-fg-muted, #71717a);
         font-weight: 600;
+      }
+      .qlc-rec-shape {
+        display: flex;
+        gap: 4px;
+        text-transform: none;
+        letter-spacing: 0;
+      }
+      .qlc-rec-shape .qlc-btn {
+        font-size: 10px;
+        padding: 2px 8px;
       }
       .qlc-rec-code {
         margin: 0;

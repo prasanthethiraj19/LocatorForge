@@ -8,16 +8,21 @@ const FW = [
 
 export function Frameworks() {
   return (
-    <section className="py-16 bg-slate-50 dark:bg-zinc-900/50 border-y border-slate-100 dark:border-zinc-900">
-      <div className="max-w-5xl mx-auto px-6">
-        <p className="text-center text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-8">
-          Works with every major framework
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <section className="relative overflow-hidden bg-forge-950 py-16">
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-20 left-1/2 h-64 w-[36rem] -translate-x-1/2 rounded-full bg-ember-600/20 blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(#292524_1px,transparent_1px)] bg-[size:20px_20px] opacity-60" />
+      </div>
+      <div className="relative mx-auto max-w-5xl px-6">
+        <p className="kicker text-center text-ember-400">Works with every major framework</p>
+        <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-5">
           {FW.map((f) => (
-            <div key={f.label} className="text-center p-4 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800">
-              <div className="font-semibold">{f.label}</div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{f.sub}</div>
+            <div
+              key={f.label}
+              className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-5 text-center transition-colors hover:border-ember-500/50"
+            >
+              <div className="font-bold text-white">{f.label}</div>
+              <div className="mt-1 text-xs text-stone-400">{f.sub}</div>
             </div>
           ))}
         </div>

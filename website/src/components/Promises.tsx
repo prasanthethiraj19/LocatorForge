@@ -3,16 +3,19 @@ import { Zap, Shield, MinusCircle } from 'lucide-react';
 const ITEMS = [
   {
     icon: Zap,
+    n: '01',
     title: 'Instant',
     body: 'Locators populate the moment you click an element. Zero hunting through 12 DevTools tabs.',
   },
   {
     icon: Shield,
+    n: '02',
     title: 'No tracking',
     body: 'Zero telemetry. Zero analytics. Zero remote calls. All settings live in your browser.',
   },
   {
     icon: MinusCircle,
+    n: '03',
     title: 'No BS',
     body: 'No upsells, no premium tier, no ads, no email signup. Locators front and centre — fluff gone.',
   },
@@ -20,16 +23,21 @@ const ITEMS = [
 
 export function Promises() {
   return (
-    <section id="promises" className="py-16 border-y border-slate-100 dark:border-zinc-900 bg-slate-50 dark:bg-zinc-900/50">
-      <div className="max-w-5xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+    <section id="promises" className="border-y border-stone-200 bg-white">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-px overflow-hidden md:grid-cols-3">
         {ITEMS.map((it) => (
-          <div key={it.title} className="flex gap-4 items-start">
-            <div className="flex-shrink-0 w-11 h-11 rounded-lg bg-emerald-600 text-white inline-flex items-center justify-center">
-              <it.icon className="w-5 h-5" />
+          <div key={it.title} className="group flex gap-4 bg-white px-8 py-9 md:border-l md:first:border-l-0 md:border-stone-200">
+            <div className="flex-shrink-0">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-ember-500 to-ember-700 text-white shadow-sm transition-transform group-hover:-translate-y-0.5">
+                <it.icon className="h-5 w-5" />
+              </div>
             </div>
             <div>
-              <h3 className="font-semibold text-lg">{it.title}</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{it.body}</p>
+              <div className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-stone-400">
+                No.{it.n}
+              </div>
+              <h3 className="mt-1 font-bold text-stone-900">{it.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-stone-600">{it.body}</p>
             </div>
           </div>
         ))}

@@ -1,29 +1,27 @@
 import { Link } from 'react-router-dom';
-import { Github } from 'lucide-react';
 
 export function Nav() {
   return (
-    <nav className="sticky top-0 z-40 w-full backdrop-blur bg-white/80 dark:bg-zinc-950/80 border-b border-slate-200 dark:border-zinc-800">
-      <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-emerald-600 text-white font-mono font-bold text-sm">LF</span>
-          <span className="font-semibold text-lg">LocatorForge</span>
+    <header className="sticky top-0 z-40 border-b border-stone-200/80 bg-stone-50/85 backdrop-blur">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+        <Link to="/" className="group flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-ember-500 to-ember-700 font-mono text-sm font-bold text-white shadow-sm transition-colors group-hover:from-ember-400 group-hover:to-ember-600">
+            LF
+          </span>
+          <span className="text-lg font-bold tracking-tight text-stone-900">LocatorForge</span>
         </Link>
-        <div className="flex items-center gap-2 text-sm">
-          <a href="/#features" className="btn-ghost hidden sm:inline-flex">Features</a>
-          <Link to="/install" className="btn-ghost hidden sm:inline-flex">Install</Link>
-          <Link to="/privacy" className="btn-ghost hidden sm:inline-flex">Privacy</Link>
-          <a
-            href="https://github.com/prasanthethiraj19"
-            target="_blank"
-            rel="noreferrer"
-            className="btn-outline"
-          >
-            <Github className="w-4 h-4" />
-            <span className="hidden sm:inline">GitHub</span>
+        <div className="flex items-center gap-1 text-sm">
+          <a href="/#features" className="btn-ghost hidden sm:inline-flex">
+            Features
           </a>
+          <Link to="/privacy" className="btn-ghost hidden sm:inline-flex">
+            Privacy
+          </Link>
+          <Link to="/install" className="btn-primary ml-1">
+            Install
+          </Link>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }

@@ -55,19 +55,27 @@ const FEATURES = [
 export function Features() {
   return (
     <section id="features" className="py-20">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Everything testers need.</h2>
-          <p className="text-slate-600 dark:text-slate-400 mt-3 max-w-2xl mx-auto">
-            One panel. Every framework. Ranked by stability. Verified live against the page.
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="mb-12 max-w-2xl">
+          <p className="kicker">Everything testers need</p>
+          <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-stone-900 md:text-4xl">
+            One panel. Every framework.
+          </h2>
+          <p className="mt-3 text-stone-600">
+            Ranked by stability. Verified live against the page you're inspecting.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map((f) => (
-            <div key={f.title} className="card hover:border-emerald-300 dark:hover:border-emerald-700 transition-colors">
-              <f.icon className="w-6 h-6 text-emerald-600 mb-3" />
-              <h3 className="font-semibold text-base mb-2">{f.title}</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{f.body}</p>
+            <div
+              key={f.title}
+              className="group rounded-xl border border-stone-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-ember-300 hover:shadow-panel"
+            >
+              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-ember-50 text-ember-600 ring-1 ring-ember-100 transition-colors group-hover:bg-ember-600 group-hover:text-white">
+                <f.icon className="h-5 w-5" />
+              </div>
+              <h3 className="font-bold text-stone-900">{f.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-stone-600">{f.body}</p>
             </div>
           ))}
         </div>

@@ -6,13 +6,15 @@ export default function NotFound() {
   return (
     <>
       <Nav />
-      <div className="max-w-3xl mx-auto px-6 py-32 text-center">
-        <p className="font-mono text-emerald-600 mb-4">404</p>
-        <h1 className="text-4xl font-bold tracking-tight mb-3">Locator not found.</h1>
-        <p className="text-slate-600 dark:text-slate-400 mb-8">
-          The page you're looking for doesn't exist (or moved).
-        </p>
-        <Link to="/" className="btn-primary">Back home</Link>
+      <div className="mx-auto max-w-3xl px-6 py-32 text-center">
+        <p className="mb-4 font-mono text-ember-600">404</p>
+        <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-stone-900">
+          Locator not found.
+        </h1>
+        <p className="mb-8 text-stone-600">The page you're looking for doesn't exist (or moved).</p>
+        <Link to="/" className="btn-primary">
+          Back home
+        </Link>
       </div>
       <Footer />
     </>

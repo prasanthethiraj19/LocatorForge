@@ -4,7 +4,7 @@
 
 [![Free](https://img.shields.io/badge/Free-Forever-10b981)](https://locatorforge.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-0.8.0-emerald)](./extension/package.json)
+[![Version](https://img.shields.io/badge/version-0.9.0-emerald)](./extension/package.json)
 [![Browsers](https://img.shields.io/badge/browsers-Chrome%20%26%20Edge-blue)](https://locatorforge.com)
 
 **Live site:** [locatorforge.com](https://locatorforge.com)
@@ -44,7 +44,7 @@ flowchart LR
         Relative[relative.ts<br/>Selenium 4]
     end
 
-    subgraph Features["v0.8 features"]
+    subgraph Features["v0.9 features"]
         Recorder[lib/recorder/<br/>9-fw test emit]
         TestData[lib/testdata/<br/>19 field types]
         Export[lib/export/<br/>page → markdown]
@@ -183,7 +183,7 @@ npm run build       # → website/dist/
 
 Deploys to Vercel from the `website/` subdirectory.
 
-## Features (v0.8.0)
+## Features (v0.9.0)
 
 ### Locator generation
 - **9 frameworks** — Playwright (TS/JS/Python/Java), Selenium (Java/Python), Cypress, WebdriverIO, Robot Framework

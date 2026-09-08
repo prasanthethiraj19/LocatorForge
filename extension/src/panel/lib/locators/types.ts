@@ -20,7 +20,11 @@ export type RelativeLocatorKind =
  */
 export type LocatorKind =
   | 'role'
+  | 'role-nth'
+  | 'scoped-role'
   | 'text'
+  | 'text-nth'
+  | 'scoped-text'
   | 'label'
   | 'placeholder'
   | 'altText'
@@ -121,6 +125,13 @@ export interface SerializedElement {
   xpathAbsolute: string;
   xpathPosition: string;
   ancestorAnchor: { selector: string; chain: string } | null;
+  uniqueTextAnchor: { selector: string; xpath: string; chain: string } | null;
+  /** 0-based index among all elements with the same role + accessible name. -1 when unknown. */
+  roleIndex: number;
+  /** 0-based index among all elements with the same role (no name filter). -1 when unknown. */
+  roleNoNameIndex: number;
+  /** 0-based index among all elements with the exact same visible text. -1 when unknown. */
+  textIndex: number;
   shadowChain: string[];
   frameChain: string[];
   isSvg: boolean;

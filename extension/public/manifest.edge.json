@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "LocatorForge",
   "short_name": "LocatorForge",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Fast Playwright, Selenium, Cypress, WebdriverIO and Robot Framework locators — straight from Edge DevTools. Recorder, freeze, test data, exports. No ads, no tracking, no BS.",
   "minimum_chrome_version": "116",
   "icons": {
@@ -24,6 +24,18 @@
       "matches": ["<all_urls>"],
       "js": ["content.js"],
       "css": ["content.css"],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["freeze.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["recorder.js"],
       "run_at": "document_idle",
       "all_frames": false
     }

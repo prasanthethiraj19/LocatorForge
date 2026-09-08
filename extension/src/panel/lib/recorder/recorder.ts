@@ -3,6 +3,9 @@ import { generateCandidates, sortCandidates } from '../locators/generate';
 import { formatExpression } from '../locators/format';
 import { quoteJS, quotePython, quoteJava } from '../utils/escape';
 import type { RecordedStep } from './types';
+import type { PomItem } from '../pom/types';
+import { generatePom } from '../pom/generate';
+import { suggestFieldName } from '../pom/naming';
 
 /**
  * Pick the best locator candidate from a SerializedElement for a recorded step.
@@ -337,6 +340,50 @@ export function buildTestFile(
   }
 
   return lines.join('\n');
+}
+
+/**
+ * Build a Page Object class from a recording: one locator field per unique
+ * element the user interacted with, emitted through the same 9-framework
+ * POM generator used by the basket → Page Object feature.
+ */
+export function buildPomFile(
+  steps: RecordedStep[],
+  framework: FrameworkDef,
+  testIdAttribute: string,
+  className = 'recorded-page',
+  url = '/',
+): string {
+  const seen = new Set<string>();
+  const items: PomItem[] = [];
+  for (const s of steps) {
+    const key = s.element.cssPath || s.element.xpathPosition || s.element.xpath || s.element.tag;
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    const { candidate } = emitStep(s, framework, testIdAttribute);
+    items.push({ id: s.id, fieldName: suggestFieldName(candidate), candidate, addedAt: s.timestamp });
+  }
+  return generatePom(items, { className, framework: framework.id, url });
+}
+
+/**
+ * Pick a sensible filename for a downloaded Page Object file.
+ */
+export function defaultPomFilename(framework: FrameworkDef): string {
+  const fam = framework.family;
+  const lang = framework.language;
+  if (fam === 'playwright' || fam === 'cypress' || fam === 'webdriverio') {
+    if (lang === 'TypeScript') return 'RecordedPage.ts';
+    if (lang === 'JavaScript') return 'RecordedPage.js';
+    if (lang === 'Python') return 'RecordedPage.py';
+    if (lang === 'Java') return 'RecordedPage.java';
+  }
+  if (fam === 'selenium') {
+    if (lang === 'Java') return 'RecordedPage.java';
+    if (lang === 'Python') return 'RecordedPage.py';
+  }
+  if (fam === 'robot') return 'RecordedPage.robot';
+  return 'RecordedPage.txt';
 }
 
 /**

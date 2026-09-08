@@ -136,9 +136,53 @@ function formatPlaywright(c: Candidate, lang: Lang): string {
       }
       return `${page}${m}(${q(role)})`;
     }
+    case 'role-nth': {
+      const role = c.args.role || '';
+      const name = c.args.name;
+      const idx = c.args.index || '0';
+      if (lang === 'Java') {
+        const roleEnum = `AriaRole.${role.toUpperCase().replace(/-/g, '_')}`;
+        const opts = name ? `new Page.GetByRoleOptions().setName(${q(name)})` : '';
+        return `${page}getByRole(${roleEnum}${opts ? `, ${opts}` : ''}).nth(${idx})`;
+      }
+      const m = lang === 'Python' ? 'get_by_role' : 'getByRole';
+      const inner = name
+        ? lang === 'Python'
+          ? `${q(role)}, name=${q(name)}`
+          : `${q(role)}, { name: ${q(name)} }`
+        : `${q(role)}`;
+      return `${page}${m}(${inner}).nth(${idx})`;
+    }
+    case 'scoped-role': {
+      const anchor = c.args.anchor || '';
+      const role = c.args.role || '';
+      const name = c.args.name;
+      const m = lang === 'Python' ? 'get_by_role' : 'getByRole';
+      if (lang === 'Java') {
+        const roleEnum = `AriaRole.${role.toUpperCase().replace(/-/g, '_')}`;
+        const opts = name ? `new Locator.GetByRoleOptions().setName(${q(name)})` : '';
+        return `${page}locator(${q(anchor)}).getByRole(${roleEnum}${opts ? `, ${opts}` : ''})`;
+      }
+      const inner = name
+        ? lang === 'Python'
+          ? `${q(role)}, name=${q(name)}`
+          : `${q(role)}, { name: ${q(name)} }`
+        : `${q(role)}`;
+      return `${page}locator(${q(anchor)}).${m}(${inner})`;
+    }
     case 'text': {
       const m = lang === 'Python' ? 'get_by_text' : 'getByText';
       return `${page}${m}(${q(c.args.value || '')})`;
+    }
+    case 'text-nth': {
+      const m = lang === 'Python' ? 'get_by_text' : 'getByText';
+      return `${page}${m}(${q(c.args.value || '')}).nth(${c.args.index || '0'})`;
+    }
+    case 'scoped-text': {
+      const anchor = c.args.anchor || '';
+      const value = c.args.value || '';
+      if (lang === 'Python') return `${page}locator(${q(anchor)}).get_by_text(${q(value)}, exact=True)`;
+      return `${page}locator(${q(anchor)}).getByText(${q(value)}, { exact: true })`;
     }
     case 'label': {
       const m = lang === 'Python' ? 'get_by_label' : 'getByLabel';
@@ -271,6 +315,26 @@ function formatSelenium(c: Candidate, lang: Lang): string {
       if (name) return by('xpath', `//*[@role='${role}' or self::${roleTagFor(role)}][normalize-space()=${JSON.stringify(name)}]`);
       return by('xpath', `//*[@role='${role}' or self::${roleTagFor(role)}]`);
     }
+    case 'role-nth': {
+      const role = c.args.role || '';
+      const name = c.args.name || '';
+      const idx = Number(c.args.index || '0') + 1;
+      const roleXp = `//*[@role='${role}' or self::${roleTagFor(role)}]`;
+      const xp = name
+        ? `(${roleXp}[normalize-space()=${JSON.stringify(name)}])[${idx}]`
+        : `(${roleXp})[${idx}]`;
+      return by('xpath', xp);
+    }
+    case 'scoped-role': {
+      const role = c.args.role || '';
+      const name = c.args.name || '';
+      const roleXp = `//*[@role='${role}' or self::${roleTagFor(role)}]`;
+      const scopeXp = scopedXPath(c);
+      const xp = name
+        ? `${scopeXp}${roleXp}[normalize-space()=${JSON.stringify(name)}]`
+        : `${scopeXp}${roleXp}`;
+      return by('xpath', xp);
+    }
     case 'label':
       return by('xpath', `//label[normalize-space(.)=${JSON.stringify(c.args.value || '')}]/following::*[self::input or self::textarea or self::select][1]`);
     case 'placeholder':
@@ -281,6 +345,15 @@ function formatSelenium(c: Candidate, lang: Lang): string {
       return by('cssSelector', `[title=${JSON.stringify(c.args.value || '')}]`);
     case 'text':
       return by('xpath', `//*[normalize-space(.)=${JSON.stringify(c.args.value || '')}]`);
+    case 'text-nth': {
+      const value = c.args.value || '';
+      const idx = Number(c.args.index || '0') + 1;
+      return by('xpath', `(//*[normalize-space(.)=${JSON.stringify(value)}])[${idx}]`);
+    }
+    case 'scoped-text': {
+      const value = c.args.value || '';
+      return by('xpath', `${scopedXPath(c)}//*[normalize-space(.)=${JSON.stringify(value)}]`);
+    }
     case 'css':
       return by('cssSelector', c.cssOrXPath || '');
     case 'xpath':
@@ -388,12 +461,60 @@ function roleTagFor(role: string): string {
   return map[role] || '*';
 }
 
+/**
+ * Converts a CSS selector anchor to an XPath location step WITHOUT trailing
+ * slash, so callers can compose it as `${anchorXPath(anchor)}//...`.
+ * Handles common patterns like #id, [role=...], nav, main, etc.
+ */
+function anchorToXPath(anchor: string): string {
+  // #id → //*[@id='...']
+  const idMatch = /^#([A-Za-z0-9_-]+)$/.exec(anchor);
+  if (idMatch) return `//*[@id='${idMatch[1]}']`;
+
+  // [role=...] → //*[@role='...']
+  const roleMatch = /^\[role=(?:"([^"]*)"|'([^']*)')\]$/.exec(anchor);
+  if (roleMatch) return `//*[@role='${roleMatch[1] || roleMatch[2]}']`;
+
+  // tagname → //tagname
+  const tagMatch = /^([a-z][a-z0-9]*)$/i.exec(anchor);
+  if (tagMatch) return `//${tagMatch[1]}`;
+
+  // Fallback: wrap in css-to-xpath generic
+  return `//${anchor}`;
+}
+
+/**
+ * Returns the structural XPath of the unique scope container for scoped
+ * locators. Prefers the anchorXPath captured at serialization time; falls back
+ * to a best-effort conversion of simple CSS anchors.
+ */
+function scopedXPath(c: Candidate): string {
+  const xp = c.args.anchorXPath;
+  if (xp) return xp;
+  return anchorToXPath(c.args.anchor || '');
+}
+
 function formatCypress(c: Candidate): string {
   switch (c.kind) {
     case 'role':
       return `cy.findByRole(${quoteJS(c.args.role || '')}${c.args.name ? `, { name: ${quoteJS(c.args.name)} }` : ''})`;
+    case 'role-nth':
+      return `cy.findByRole(${quoteJS(c.args.role || '')}${c.args.name ? `, { name: ${quoteJS(c.args.name)} }` : ''}).eq(${c.args.index || '0'})`;
+    case 'scoped-role': {
+      const anchor = c.args.anchor || '';
+      const role = c.args.role || '';
+      const opts = c.args.name ? `, { name: ${quoteJS(c.args.name)} }` : '';
+      return `cy.get(${quoteJS(anchor)}).findByRole(${quoteJS(role)}${opts})`;
+    }
     case 'text':
       return `cy.contains(${quoteJS(c.args.value || '')})`;
+    case 'text-nth':
+      return `cy.contains(${quoteJS(c.args.value || '')}).eq(${c.args.index || '0'})`;
+    case 'scoped-text': {
+      const anchor = c.args.anchor || '';
+      const value = c.args.value || '';
+      return `cy.get(${quoteJS(anchor)}).contains(${quoteJS(value)})`;
+    }
     case 'label':
       return `cy.findByLabelText(${quoteJS(c.args.value || '')})`;
     case 'placeholder':
@@ -452,8 +573,35 @@ function formatWdio(c: Candidate): string {
   switch (c.kind) {
     case 'role':
       return `await $(${quoteJS(`[role=${JSON.stringify(c.args.role || '')}]`)})`;
+    case 'role-nth': {
+      const role = c.args.role || '';
+      const name = c.args.name || '';
+      const idx = Number(c.args.index || '0');
+      if (name) {
+        return `await $$(${quoteJS(`//*[@role='${role}' or self::${roleTagFor(role)}][normalize-space()=${JSON.stringify(name)}]`)})[${idx}]`;
+      }
+      return `await $$(${quoteJS(`[role=${JSON.stringify(role)}]`)})[${idx}]`;
+    }
+    case 'scoped-role': {
+      const role = c.args.role || '';
+      const name = c.args.name || '';
+      const roleXp = `//*[@role='${role}' or self::${roleTagFor(role)}]`;
+      const xp = name
+        ? `${scopedXPath(c)}${roleXp}[normalize-space()=${JSON.stringify(name)}]`
+        : `${scopedXPath(c)}${roleXp}`;
+      return `await $(${quoteJS(xp)})`;
+    }
     case 'text':
       return `await $(${quoteJS('=' + (c.args.value || ''))})`;
+    case 'text-nth': {
+      const value = c.args.value || '';
+      const idx = Number(c.args.index || '0');
+      return `await $$(${quoteJS(`//*[normalize-space(.)=${JSON.stringify(value)}]`)})[${idx}]`;
+    }
+    case 'scoped-text': {
+      const value = c.args.value || '';
+      return `await $(${quoteJS(`${scopedXPath(c)}//*[normalize-space(.)=${JSON.stringify(value)}]`)})`;
+    }
     case 'label':
       return `await $(${quoteJS(`//label[normalize-space(.)=${JSON.stringify(c.args.value || '')}]/following::input[1]`)})`;
     case 'placeholder':
@@ -521,10 +669,36 @@ function formatRobot(c: Candidate): string {
       return `css:[title="${c.args.value || ''}"]`;
     case 'text':
       return `xpath://*[normalize-space(.)="${c.args.value || ''}"]`;
+    case 'text-nth': {
+      const idx = Number(c.args.index || '0') + 1;
+      return `xpath:(//*[normalize-space(.)="${c.args.value || ''}"])[${idx}]`;
+    }
+    case 'scoped-text': {
+      const value = c.args.value || '';
+      return `xpath:${scopedXPath(c)}//*[normalize-space(.)="${value}"]`;
+    }
+    case 'scoped-role': {
+      const role = c.args.role || '';
+      const name = c.args.name || '';
+      const xp = name
+        ? `${scopedXPath(c)}//*[@role="${role}" or self::${roleTagFor(role)}][normalize-space(.)="${name}"]`
+        : `${scopedXPath(c)}//*[@role="${role}" or self::${roleTagFor(role)}]`;
+      return `xpath:${xp}`;
+    }
     case 'label':
       return `xpath://label[normalize-space(.)="${c.args.value || ''}"]/following::input[1]`;
     case 'role':
       return `css:[role="${c.args.role || ''}"]`;
+    case 'role-nth': {
+      const role = c.args.role || '';
+      const name = c.args.name || '';
+      const idx = Number(c.args.index || '0') + 1;
+      const roleXp = `//*[@role="${role}" or self::${roleTagFor(role)}]`;
+      const xp = name
+        ? `(${roleXp}[normalize-space(.)="${name}"])[${idx}]`
+        : `(${roleXp})[${idx}]`;
+      return `xpath:${xp}`;
+    }
     case 'css':
       return `css:${c.cssOrXPath || ''}`;
     case 'xpath':

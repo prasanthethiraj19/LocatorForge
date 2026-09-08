@@ -444,12 +444,17 @@ function stop() {
   hideIndicator();
 }
 
-chrome.runtime.onMessage.addListener((msg: RecorderRuntimeMessage) => {
-  if (msg.type === 'REC_START') start();
-  else if (msg.type === 'REC_STOP') stop();
-});
-
 // Force this file to be treated as a module so its top-level identifiers
 // (start, stop, onClick, etc.) do not collide with content.ts in the
 // TypeScript global script scope. esbuild still emits it as IIFE.
 export {};
+
+// Register only once even if the SW re-injects this file (static content-script
+// registration + on-demand executeScript fallback can both load it).
+if (!(window as unknown as { __qlcRecorderLoaded?: boolean }).__qlcRecorderLoaded) {
+  (window as unknown as { __qlcRecorderLoaded: boolean }).__qlcRecorderLoaded = true;
+  chrome.runtime.onMessage.addListener((msg: RecorderRuntimeMessage) => {
+    if (msg.type === 'REC_START') start();
+    else if (msg.type === 'REC_STOP') stop();
+  });
+}

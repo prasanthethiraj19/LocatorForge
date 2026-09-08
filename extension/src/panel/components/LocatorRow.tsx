@@ -14,7 +14,11 @@ interface Props {
 
 const KIND_LABEL: Record<Candidate['kind'], string> = {
   role: 'role',
+  'role-nth': 'role·nth',
+  'scoped-role': 'scoped·role',
   text: 'text',
+  'text-nth': 'text·nth',
+  'scoped-text': 'scoped·text',
   label: 'label',
   placeholder: 'placeholder',
   altText: 'alt',
