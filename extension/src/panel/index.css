@@ -1,17 +1,20 @@
 :root {
   color-scheme: light dark;
-  --qlc-bg: #fafaf9;
-  --qlc-bg-alt: #f4f4f5;
+  --qlc-bg: #faf9f7;
+  --qlc-bg-alt: #f5f2ee;
   --qlc-bg-row: #ffffff;
-  --qlc-fg: #18181b;
-  --qlc-fg-muted: #71717a;
-  --qlc-fg-subtle: #a1a1aa;
-  --qlc-border: #e4e4e7;
-  --qlc-border-strong: #d4d4d8;
-  --qlc-accent: #059669;
-  --qlc-accent-hov: #047857;
-  --qlc-accent-soft: #d1fae5;
+  --qlc-fg: #1c1917;
+  --qlc-fg-muted: #78716c;
+  --qlc-fg-subtle: #a8a29e;
+  --qlc-border: #e7e2dc;
+  --qlc-border-strong: #d6cfc7;
+  --qlc-accent: #e14f08;
+  --qlc-accent-hov: #c2410c;
+  --qlc-accent-soft: #ffead3;
   --qlc-accent-fg: #ffffff;
+  --qlc-good: #059669;
+  --qlc-good-hov: #047857;
+  --qlc-good-soft: #d1fae5;
   --qlc-amber: #d97706;
   --qlc-amber-soft: #fef3c7;
   --qlc-rose: #e11d48;
@@ -20,22 +23,26 @@
   --qlc-cyan-soft: #cffafe;
   --qlc-violet: #7c3aed;
   --qlc-violet-soft: #ede9fe;
+  --qlc-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI Variable", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   --qlc-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --qlc-bg: #09090b;
-    --qlc-bg-alt: #18181b;
-    --qlc-bg-row: #0f0f10;
-    --qlc-fg: #fafafa;
-    --qlc-fg-muted: #a1a1aa;
-    --qlc-fg-subtle: #52525b;
-    --qlc-border: #27272a;
-    --qlc-border-strong: #3f3f46;
-    --qlc-accent: #10b981;
-    --qlc-accent-hov: #34d399;
-    --qlc-accent-soft: rgba(16, 185, 129, 0.15);
+    --qlc-bg: #0c0a09;
+    --qlc-bg-alt: #1c1917;
+    --qlc-bg-row: #141211;
+    --qlc-fg: #fafaf9;
+    --qlc-fg-muted: #a8a29e;
+    --qlc-fg-subtle: #57534e;
+    --qlc-border: #292524;
+    --qlc-border-strong: #44403c;
+    --qlc-accent: #f16a13;
+    --qlc-accent-hov: #fb923c;
+    --qlc-accent-soft: rgba(225, 79, 8, 0.16);
+    --qlc-good: #34d399;
+    --qlc-good-hov: #6ee7b7;
+    --qlc-good-soft: rgba(16, 185, 129, 0.16);
     --qlc-amber: #f59e0b;
     --qlc-amber-soft: rgba(245, 158, 11, 0.15);
     --qlc-rose: #fb7185;
@@ -55,9 +62,9 @@ html, body, #root {
   height: 100%;
   background: var(--qlc-bg);
   color: var(--qlc-fg);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 12px;
-  line-height: 1.4;
+  font-family: var(--qlc-sans);
+  font-size: 12.5px;
+  line-height: 1.45;
 }
 
 .qlc-app {
@@ -91,7 +98,7 @@ html, body, #root {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px;
+  padding: 9px 14px;
   border-bottom: 1px solid var(--qlc-border);
   background: var(--qlc-bg-alt);
   flex-wrap: wrap;
@@ -112,9 +119,9 @@ html, body, #root {
   justify-content: center;
   width: 26px;
   height: 26px;
-  background: var(--qlc-accent);
+  background: linear-gradient(135deg, var(--qlc-accent-hov), var(--qlc-accent));
   color: var(--qlc-accent-fg);
-  border-radius: 5px;
+  border-radius: 6px;
   font-weight: 700;
   font-size: 10px;
   letter-spacing: 0.5px;
@@ -131,7 +138,7 @@ html, body, #root {
   font-size: 11px;
   padding: 4px 24px 4px 8px;
   border: 1px solid var(--qlc-border-strong);
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--qlc-bg-row);
   color: var(--qlc-fg);
   cursor: pointer;
@@ -149,11 +156,12 @@ html, body, #root {
   border: 1px solid var(--qlc-border-strong);
   background: var(--qlc-bg-row);
   color: var(--qlc-fg);
-  border-radius: 4px;
-  padding: 4px 9px;
+  border-radius: 6px;
+  padding: 4px 10px;
   font-size: 11px;
   cursor: pointer;
   font-family: inherit;
+  font-weight: 500;
   transition: all 100ms;
 }
 .qlc-btn:hover:not(:disabled) { background: var(--qlc-bg-alt); border-color: var(--qlc-accent); color: var(--qlc-accent); }
@@ -173,8 +181,8 @@ html, body, #root {
   border-color: var(--qlc-violet);
 }
 @keyframes qlc-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.5); }
-  50% { box-shadow: 0 0 0 4px rgba(5, 150, 105, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(225, 79, 8, 0.5); }
+  50% { box-shadow: 0 0 0 4px rgba(225, 79, 8, 0); }
 }
 
 /* ─── Element bar ─────────────────────────────────────────── */
@@ -228,7 +236,7 @@ html, body, #root {
   font-size: 11px;
   padding: 4px 8px;
   border: 1px solid var(--qlc-border-strong);
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--qlc-bg-row);
   color: var(--qlc-fg);
 }
@@ -310,19 +318,19 @@ html, body, #root {
 .qlc-list { list-style: none; margin: 0; padding: 0; }
 .qlc-row {
   border-top: 1px solid var(--qlc-border);
-  padding: 6px 12px 8px 12px;
+  padding: 8px 14px 10px 14px;
   background: var(--qlc-bg-row);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   border-left: 3px solid transparent;
 }
 .qlc-row:first-child { border-top: none; }
-.qlc-row-recommended { border-left-color: rgba(5, 150, 105, 0.2); }
+.qlc-row-recommended { border-left-color: rgba(225, 79, 8, 0.25); }
 .qlc-row-smart { border-left-color: rgba(124, 58, 237, 0.2); }
 .qlc-row-alternative { border-left-color: rgba(8, 145, 178, 0.2); }
 .qlc-row-fallback { border-left-color: rgba(217, 119, 6, 0.2); }
-.qlc-row-unique { background: linear-gradient(to right, var(--qlc-accent-soft) 0, var(--qlc-bg-row) 200px); }
+.qlc-row-unique { background: linear-gradient(to right, var(--qlc-good-soft) 0, var(--qlc-bg-row) 200px); }
 
 .qlc-row-head {
   display: flex;
@@ -356,7 +364,7 @@ html, body, #root {
   font-size: 8px;
   letter-spacing: 1px;
 }
-.qlc-stab-best .qlc-stab-dots { color: var(--qlc-accent); }
+.qlc-stab-best .qlc-stab-dots { color: var(--qlc-good); }
 .qlc-stab-good .qlc-stab-dots { color: var(--qlc-cyan); }
 .qlc-stab-ok .qlc-stab-dots { color: var(--qlc-amber); }
 .qlc-stab-fragile .qlc-stab-dots { color: var(--qlc-rose); opacity: 0.7; }
@@ -367,7 +375,7 @@ html, body, #root {
   padding: 1px 5px;
   border-radius: 2px;
 }
-.qlc-cnt-unique { background: var(--qlc-accent-soft); color: var(--qlc-accent); }
+.qlc-cnt-unique { background: var(--qlc-good-soft); color: var(--qlc-good); }
 .qlc-cnt-few { background: var(--qlc-amber-soft); color: var(--qlc-amber); }
 .qlc-cnt-many { background: var(--qlc-rose-soft); color: var(--qlc-rose); }
 .qlc-cnt-zero { background: var(--qlc-rose-soft); color: var(--qlc-rose); opacity: 0.6; }
@@ -384,16 +392,16 @@ html, body, #root {
 
 .qlc-expr {
   font-family: var(--qlc-mono);
-  font-size: 11.5px;
+  font-size: 12px;
   background: var(--qlc-bg-alt);
   border: 1px solid var(--qlc-border);
-  border-radius: 3px;
-  padding: 5px 8px;
+  border-radius: 5px;
+  padding: 6px 10px;
   color: var(--qlc-fg);
   overflow-x: auto;
   white-space: pre;
   user-select: all;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 /* ─── Icon buttons ────────────────────────────────────────── */
@@ -401,9 +409,9 @@ html, body, #root {
   border: 1px solid var(--qlc-border-strong);
   background: var(--qlc-bg-row);
   color: var(--qlc-fg-muted);
-  width: 22px;
-  height: 22px;
-  border-radius: 3px;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
   font-size: 11px;
   cursor: pointer;
   display: inline-flex;

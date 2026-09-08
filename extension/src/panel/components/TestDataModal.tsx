@@ -60,7 +60,7 @@ export function TestDataModal({ open, onClose, element, onFill }: TestDataModalP
     // We re-fetch by reading $0 in the inspected window. This must use the live
     // selection so it lines up with whatever the user picked.
     const code = `(() => {
-      const el = $0;
+      const el = (typeof $0 === 'undefined' || $0 === null) ? null : $0;
       if (!el || el.tagName !== 'SELECT') return null;
       return Array.from(el.options).map(o => o.value != null ? o.value : o.textContent || '');
     })()`;
@@ -117,7 +117,7 @@ export function TestDataModal({ open, onClose, element, onFill }: TestDataModalP
     }
     const literal = JSON.stringify(value);
     const code = `(() => {
-      const el = $0;
+      const el = (typeof $0 === 'undefined' || $0 === null) ? null : $0;
       if (!el) return { ok: false, reason: 'no-selection' };
       const tag = el.tagName ? el.tagName.toLowerCase() : '';
       if (tag !== 'input' && tag !== 'textarea' && tag !== 'select') {
@@ -155,7 +155,9 @@ export function TestDataModal({ open, onClose, element, onFill }: TestDataModalP
         code,
         (result, exc) => {
           if (exc) {
-            setFillStatus({ kind: 'err', msg: 'Fill failed: eval error' });
+            const d = exc as { description?: string; value?: string } | undefined;
+            const why = (d && (d.description || d.value)) || 'eval error';
+            setFillStatus({ kind: 'err', msg: `Fill failed (${why})` });
           } else if (result && result.ok) {
             setFillStatus({ kind: 'ok', msg: 'Filled into $0' });
           } else {

@@ -2,6 +2,7 @@ import { Nav } from './components/Nav';
 import { Hero } from './components/Hero';
 import { Promises } from './components/Promises';
 import { Frameworks } from './components/Frameworks';
+import { Screens } from './components/Screens';
 import { Features } from './components/Features';
 import { CodeSample } from './components/CodeSample';
 import { HowItWorks } from './components/HowItWorks';
@@ -17,6 +18,7 @@ export default function App() {
         <Hero />
         <Promises />
         <Frameworks />
+        <Screens />
         <Features />
         <CodeSample />
         <HowItWorks />

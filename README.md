@@ -4,7 +4,7 @@
 
 [![Free](https://img.shields.io/badge/Free-Forever-10b981)](https://locatorforge.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-0.9.0-emerald)](./extension/package.json)
+[![Version](https://img.shields.io/badge/version-0.9.1-emerald)](./extension/package.json)
 [![Browsers](https://img.shields.io/badge/browsers-Chrome%20%26%20Edge-blue)](https://locatorforge.com)
 
 **Live site:** [https://locatorforge.vercel.app/]
@@ -183,7 +183,13 @@ npm run build       # → website/dist/
 
 Deploys to Vercel from the `website/` subdirectory.
 
-## Features (v0.9.0)
+## Features (v0.9.1)
+
+### What's new in v0.9.1
+- **Visual refresh** — the DevTools panel now wears the LocatorForge "ember" identity (warm stone neutrals + ember-orange accent, matching locatorforge.com). Typography, spacing, corner radii and the brand mark were updated; **green is reserved for semantic "best / unique"** stability markers.
+- **Site screenshots** — the marketing site gained a "The locator panel, live." gallery with real rendered panel screenshots (sign-in button, form input, link strategies); click any image to open it full-screen (lightbox with Esc / click-outside close).
+- **Console-noise fixes** — the panel no longer evaluates unguarded `$0` while idle (previously surfaced as errors in DevTools consoles), and the Test Data modal now reports the *actual* eval reason (e.g. navigating/closed inspected page) instead of a generic "eval error".
+- **Chrome + Edge parity** — recorder and freeze content scripts are statically registered (no on-demand injection dependency); identical builds ship for both browsers from `dist/chrome` and `dist/edge`.
 
 ### Locator generation
 - **9 frameworks** — Playwright (TS/JS/Python/Java), Selenium (Java/Python), Cypress, WebdriverIO, Robot Framework

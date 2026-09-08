@@ -27,7 +27,9 @@ export function useSelectedElement() {
 
     function readNow() {
       if (stoppedRef.current) return;
-      const code = `${SERIALIZE_FN_SOURCE}\n__qlcSerialize($0)`;
+      // $0 only exists once the user selects a node in the Elements tree; guard so an
+      // idle panel never throws (surfaces as a console error while recording).
+      const code = `${SERIALIZE_FN_SOURCE}\n(typeof $0 === 'undefined' || $0 === null) ? null : __qlcSerialize($0)`;
       try {
         chrome.devtools.inspectedWindow.eval(code, (result, exc) => {
           if (stoppedRef.current) return;
