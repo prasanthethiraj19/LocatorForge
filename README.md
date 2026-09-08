@@ -7,7 +7,7 @@
 [![Version](https://img.shields.io/badge/version-0.9.0-emerald)](./extension/package.json)
 [![Browsers](https://img.shields.io/badge/browsers-Chrome%20%26%20Edge-blue)](https://locatorforge.com)
 
-**Live site:** [locatorforge.com](https://locatorforge.com)
+**Live site:** [https://locatorforge.vercel.app/]
 
 ---
 
