@@ -188,6 +188,7 @@ Deploys to Vercel from the `website/` subdirectory.
 ### What's new in v0.9.1
 - **Visual refresh** — the DevTools panel now wears the LocatorForge "ember" identity (warm stone neutrals + ember-orange accent, matching locatorforge.com). Typography, spacing, corner radii and the brand mark were updated; **green is reserved for semantic "best / unique"** stability markers.
 - **Site screenshots** — the marketing site gained a "The locator panel, live." gallery with real rendered panel screenshots (sign-in button, form input, link strategies); click any image to open it full-screen (lightbox with Esc / click-outside close).
+- **Demo video** — the site embeds an 18-second HD (1920×1080) walkthrough: a real recorder session against a sample store page that ends by generating a Playwright test and a Page Object. MP4 + WebM sources, no audio.
 - **Console-noise fixes** — the panel no longer evaluates unguarded `$0` while idle (previously surfaced as errors in DevTools consoles), and the Test Data modal now reports the *actual* eval reason (e.g. navigating/closed inspected page) instead of a generic "eval error".
 - **Chrome + Edge parity** — recorder and freeze content scripts are statically registered (no on-demand injection dependency); identical builds ship for both browsers from `dist/chrome` and `dist/edge`.
 
