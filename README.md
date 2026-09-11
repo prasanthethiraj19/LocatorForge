@@ -1,6 +1,6 @@
 # LocatorForge
 
-> Fast Chrome & Edge DevTools extension that generates Playwright, Selenium, Cypress, WebdriverIO and Robot Framework locators — straight from any element on a page. No ads. No tracking. No BS.
+> Fast Chrome & Edge DevTools extension that generates Playwright, Selenium, Cypress, WebdriverIO and Robot Framework locators — straight from any element on a page. No ads. No tracking. No signup.
 
 [![Free](https://img.shields.io/badge/Free-Forever-10b981)](https://locatorforge.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](./LICENSE)

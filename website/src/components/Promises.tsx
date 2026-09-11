@@ -1,4 +1,4 @@
-import { Zap, Shield, MinusCircle } from 'lucide-react';
+import { Zap, Shield, Gift } from 'lucide-react';
 
 const ITEMS = [
   {
@@ -14,10 +14,10 @@ const ITEMS = [
     body: 'Zero telemetry. Zero analytics. Zero remote calls. All settings live in your browser.',
   },
   {
-    icon: MinusCircle,
+    icon: Gift,
     n: '03',
-    title: 'No BS',
-    body: 'No upsells, no premium tier, no ads, no email signup. Locators front and centre — fluff gone.',
+    title: 'Completely free',
+    body: 'No premium tier, no ads, no signup, no paywalled features. Every framework and strategy is included, free.',
   },
 ];
 
