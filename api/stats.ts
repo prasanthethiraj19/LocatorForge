@@ -1,10 +1,9 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { CHROME_ZIP_PATH, EDGE_ZIP_PATH } from '../src/lib/version';
 
-export type Browser = 'chrome' | 'edge';
+type Browser = 'chrome' | 'edge';
 
-export interface DownloadCounts {
+interface DownloadCounts {
   chrome: number;
   edge: number;
   total: number;
@@ -19,7 +18,7 @@ function restStore(): { url: string; token: string } | null {
   return url && token ? { url: url.replace(/\/+$/, ''), token } : null;
 }
 
-async function redis(command: (string | number)[] | (string | number)[][]): Promise<unknown> {
+async function redis(command: unknown): Promise<unknown> {
   const store = restStore()!;
   const response = await fetch(store.url, {
     method: 'POST',
@@ -31,8 +30,7 @@ async function redis(command: (string | number)[] | (string | number)[][]): Prom
     cache: 'no-store',
   });
   if (!response.ok) throw new Error(`counter store returned ${response.status}`);
-  const data = (await response.json()) as { result?: unknown };
-  return data.result;
+  return ((await response.json()) as { result?: unknown }).result;
 }
 
 function toCount(value: unknown): number {
@@ -44,7 +42,7 @@ function withTotal(chrome: number, edge: number): DownloadCounts {
   return { chrome, edge, total: chrome + edge };
 }
 
-async function readLocalCounts(): Promise<DownloadCounts> {
+async function readLocal(): Promise<DownloadCounts> {
   try {
     const raw = await readFile(LOCAL_FILE, 'utf8');
     const parsed = JSON.parse(raw) as Partial<DownloadCounts>;
@@ -52,10 +50,6 @@ async function readLocalCounts(): Promise<DownloadCounts> {
   } catch {
     return withTotal(0, 0);
   }
-}
-
-export function zipPath(browser: Browser): string {
-  return browser === 'chrome' ? CHROME_ZIP_PATH : EDGE_ZIP_PATH;
 }
 
 export async function readDownloadCounts(): Promise<DownloadCounts> {
@@ -67,18 +61,18 @@ export async function readDownloadCounts(): Promise<DownloadCounts> {
       ])) as Array<{ result?: unknown }>;
       return withTotal(toCount(chrome?.result), toCount(edge?.result));
     }
-    return await readLocalCounts();
+    return await readLocal();
   } catch {
     return withTotal(0, 0);
   }
 }
 
-async function incrementDownload(browser: Browser): Promise<void> {
+async function increment(browser: Browser): Promise<void> {
   if (restStore()) {
     await redis(['INCR', `${KEY_PREFIX}:${browser}`]);
     return;
   }
-  const counts = await readLocalCounts();
+  const counts = await readLocal();
   counts[browser] += 1;
   await writeFile(
     LOCAL_FILE,
@@ -87,11 +81,30 @@ async function incrementDownload(browser: Browser): Promise<void> {
   );
 }
 
-export async function recordDownload(browser: Browser): Promise<string> {
-  try {
-    await incrementDownload(browser);
-  } catch {
-    // A failed count must never block a real download.
+function json(counts: DownloadCounts): Response {
+  return new Response(JSON.stringify(counts), {
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+    },
+  });
+}
+
+export async function GET(): Promise<Response> {
+  return json(await readDownloadCounts());
+}
+
+export async function POST(request: Request): Promise<Response> {
+  const browser = new URL(request.url).searchParams.get('browser');
+  if (browser !== 'chrome' && browser !== 'edge') {
+    return new Response('unknown browser', { status: 400 });
   }
-  return zipPath(browser);
+
+  try {
+    await increment(browser);
+  } catch {
+    // A failed count must never surface to the visitor.
+  }
+
+  return json(await readDownloadCounts());
 }

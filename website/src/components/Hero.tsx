@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Download, BookOpen } from 'lucide-react';
-import { VERSION, downloadUrl } from '@/lib/version';
+import { VERSION, CHROME_ZIP_PATH, EDGE_ZIP_PATH } from '@/lib/version';
+import { countDownload } from '@/lib/downloadStats';
 import { DownloadCount } from '@/components/DownloadCount';
 
 const ROWS = [
@@ -61,11 +62,21 @@ export function Hero() {
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-3">
-            <a href={downloadUrl('chrome')} download className="btn-primary px-6 py-3 text-base">
+            <a
+              href={CHROME_ZIP_PATH}
+              download
+              onClick={() => countDownload('chrome')}
+              className="btn-primary px-6 py-3 text-base"
+            >
               <Download className="h-5 w-5" />
               Download for Chrome
             </a>
-            <a href={downloadUrl('edge')} download className="btn-outline px-6 py-3 text-base">
+            <a
+              href={EDGE_ZIP_PATH}
+              download
+              onClick={() => countDownload('edge')}
+              className="btn-outline px-6 py-3 text-base"
+            >
               <Download className="h-5 w-5" />
               Download for Edge
             </a>

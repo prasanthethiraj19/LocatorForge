@@ -1,23 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Download } from 'lucide-react';
-
-interface DownloadCounts {
-  chrome: number;
-  edge: number;
-  total: number;
-}
+import { fetchDownloadCounts, type DownloadCounts } from '@/lib/downloadStats';
 
 export function DownloadCount({ className = 'mt-5' }: { className?: string }) {
   const [counts, setCounts] = useState<DownloadCounts | null>(null);
 
   useEffect(() => {
     let alive = true;
-    fetch('/api/downloads', { cache: 'no-store' })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: DownloadCounts | null) => {
-        if (alive && data && typeof data.total === 'number') setCounts(data);
-      })
-      .catch(() => {});
+    fetchDownloadCounts().then((data) => {
+      if (alive && data) setCounts(data);
+    });
     return () => {
       alive = false;
     };

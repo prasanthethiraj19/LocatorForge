@@ -1,59 +1,35 @@
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'node:path';
-import { readDownloadCounts, recordDownload, type Browser } from './server/counter';
+import { GET, POST } from '../api/stats';
 
-function downloadApi(): Plugin {
+function statsApi(): Plugin {
   return {
-    name: 'locatorforge-download-api',
+    name: 'locatorforge-stats-api',
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const url = new URL(req.url ?? '/', 'http://localhost');
-        if (!url.pathname.startsWith('/api/')) return next();
+        if (url.pathname !== '/api/stats') return next();
 
-        res.setHeader('Cache-Control', 'no-store');
+        const handler = req.method === 'POST' ? POST : GET;
 
-        if (url.pathname === '/api/downloads') {
-          readDownloadCounts()
-            .then((counts) => {
-              res.setHeader('Content-Type', 'application/json');
-              res.end(JSON.stringify(counts));
-            })
-            .catch(() => {
-              res.statusCode = 500;
-              res.end('{}');
-            });
-          return;
-        }
-
-        if (url.pathname === '/api/download') {
-          const browser = url.searchParams.get('browser');
-          if (browser !== 'chrome' && browser !== 'edge') {
-            res.statusCode = 400;
-            res.end('unknown browser');
-            return;
-          }
-          recordDownload(browser as Browser)
-            .then((target) => {
-              res.statusCode = 302;
-              res.setHeader('Location', target);
-              res.end();
-            })
-            .catch(() => {
-              res.statusCode = 500;
-              res.end();
-            });
-          return;
-        }
-
-        next();
+        handler(new Request(url))
+          .then(async (response) => {
+            res.statusCode = response.status;
+            response.headers.forEach((value, key) => res.setHeader(key, value));
+            res.end(await response.text());
+          })
+          .catch(() => {
+            res.statusCode = 500;
+            res.end('{}');
+          });
       });
     },
   };
 }
 
 export default defineConfig({
-  plugins: [react(), downloadApi()],
+  plugins: [react(), statsApi()],
   resolve: {
     alias: { '@': resolve(__dirname, 'src') },
   },

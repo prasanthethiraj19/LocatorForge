@@ -1,5 +1,6 @@
 import { Download } from 'lucide-react';
-import { VERSION, downloadUrl } from '@/lib/version';
+import { VERSION, CHROME_ZIP_PATH, EDGE_ZIP_PATH } from '@/lib/version';
+import { countDownload } from '@/lib/downloadStats';
 import { DownloadCount } from '@/components/DownloadCount';
 
 export function CTA() {
@@ -20,16 +21,18 @@ export function CTA() {
             </p>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
               <a
-                href={downloadUrl('chrome')}
+                href={CHROME_ZIP_PATH}
                 download
+                onClick={() => countDownload('chrome')}
                 className="btn bg-ember-600 px-6 py-3 text-base text-white hover:bg-ember-500"
               >
                 <Download className="h-5 w-5" />
                 Download for Chrome
               </a>
               <a
-                href={downloadUrl('edge')}
+                href={EDGE_ZIP_PATH}
                 download
+                onClick={() => countDownload('edge')}
                 className="btn border-2 border-white/25 px-6 py-3 text-base text-white hover:border-white/50 hover:bg-white/5"
               >
                 <Download className="h-5 w-5" />
