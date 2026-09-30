@@ -55,11 +55,9 @@ async function readLocal(): Promise<DownloadCounts> {
 export async function readDownloadCounts(): Promise<DownloadCounts> {
   try {
     if (restStore()) {
-      const [chrome, edge] = (await redis([
-        ['GET', `${KEY_PREFIX}:chrome`],
-        ['GET', `${KEY_PREFIX}:edge`],
-      ])) as Array<{ result?: unknown }>;
-      return withTotal(toCount(chrome?.result), toCount(edge?.result));
+      const chrome = await redis(['GET', `${KEY_PREFIX}:chrome`]);
+      const edge = await redis(['GET', `${KEY_PREFIX}:edge`]);
+      return withTotal(toCount(chrome), toCount(edge));
     }
     return await readLocal();
   } catch {
