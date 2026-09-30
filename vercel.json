@@ -6,7 +6,7 @@
   "installCommand": "echo skip-root-install",
   "framework": null,
   "rewrites": [
-    { "source": "/((?!downloads|favicon|assets).*)", "destination": "/index.html" }
+    { "source": "/((?!api|downloads|favicon|assets).*)", "destination": "/index.html" }
   ],
   "headers": [
     {

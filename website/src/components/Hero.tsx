@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Download, BookOpen } from 'lucide-react';
-import { VERSION, CHROME_ZIP_PATH, EDGE_ZIP_PATH } from '@/lib/version';
+import { VERSION, downloadUrl } from '@/lib/version';
+import { DownloadCount } from '@/components/DownloadCount';
 
 const ROWS = [
   {
@@ -60,11 +61,11 @@ export function Hero() {
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-3">
-            <a href={CHROME_ZIP_PATH} download className="btn-primary px-6 py-3 text-base">
+            <a href={downloadUrl('chrome')} download className="btn-primary px-6 py-3 text-base">
               <Download className="h-5 w-5" />
               Download for Chrome
             </a>
-            <a href={EDGE_ZIP_PATH} download className="btn-outline px-6 py-3 text-base">
+            <a href={downloadUrl('edge')} download className="btn-outline px-6 py-3 text-base">
               <Download className="h-5 w-5" />
               Download for Edge
             </a>
@@ -73,6 +74,8 @@ export function Hero() {
               How to install
             </Link>
           </div>
+
+          <DownloadCount />
 
           <ul className="mt-9 flex flex-wrap gap-x-6 gap-y-2 text-sm text-stone-500">
             {['Free forever', 'No account required', 'Works on any website'].map((t) => (

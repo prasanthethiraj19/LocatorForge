@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { Download, ArrowLeft } from 'lucide-react';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
-import { VERSION, CHROME_ZIP_PATH, EDGE_ZIP_PATH } from '@/lib/version';
+import { DownloadCount } from '@/components/DownloadCount';
+import { VERSION, downloadUrl } from '@/lib/version';
 
 type Browser = 'chrome' | 'edge';
 
@@ -88,7 +89,6 @@ const STEPS: Record<Browser, { title: string; body: React.ReactNode }[]> = {
 export default function Install() {
   const [browser, setBrowser] = useState<Browser>('chrome');
   const current = BROWSERS.find((b) => b.id === browser)!;
-  const zipPath = browser === 'chrome' ? CHROME_ZIP_PATH : EDGE_ZIP_PATH;
 
   return (
     <>
@@ -117,10 +117,13 @@ export default function Install() {
           ))}
         </div>
 
-        <a href={zipPath} download className="btn-primary mb-10 px-6 py-3 text-base">
-          <Download className="h-5 w-5" />
-          Download v{VERSION} for {current.label} (zip)
-        </a>
+        <div className="mb-10 flex flex-col items-start gap-4">
+          <a href={downloadUrl(browser)} download className="btn-primary px-6 py-3 text-base">
+            <Download className="h-5 w-5" />
+            Download v{VERSION} for {current.label} (zip)
+          </a>
+          <DownloadCount className="" />
+        </div>
 
         <ol className="space-y-6">
           {STEPS[browser].map((s, i) => (

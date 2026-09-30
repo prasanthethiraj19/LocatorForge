@@ -1,5 +1,6 @@
 import { Download } from 'lucide-react';
-import { VERSION, CHROME_ZIP_PATH, EDGE_ZIP_PATH } from '@/lib/version';
+import { VERSION, downloadUrl } from '@/lib/version';
+import { DownloadCount } from '@/components/DownloadCount';
 
 export function CTA() {
   return (
@@ -19,7 +20,7 @@ export function CTA() {
             </p>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
               <a
-                href={CHROME_ZIP_PATH}
+                href={downloadUrl('chrome')}
                 download
                 className="btn bg-ember-600 px-6 py-3 text-base text-white hover:bg-ember-500"
               >
@@ -27,7 +28,7 @@ export function CTA() {
                 Download for Chrome
               </a>
               <a
-                href={EDGE_ZIP_PATH}
+                href={downloadUrl('edge')}
                 download
                 className="btn border-2 border-white/25 px-6 py-3 text-base text-white hover:border-white/50 hover:bg-white/5"
               >
@@ -38,6 +39,7 @@ export function CTA() {
             <p className="mt-6 font-mono text-xs text-stone-400">
               Free &middot; v{VERSION} &middot; No account
             </p>
+            <DownloadCount className="mt-2 justify-center text-stone-400" />
           </div>
         </div>
       </div>
