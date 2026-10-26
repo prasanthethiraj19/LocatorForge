@@ -21,7 +21,9 @@ concurrency:
 
 jobs:
   bump:
-    if: ${{ !contains(github.event.head_commit.message || '', '[skip version]') }}
+    # Only the bot's own commit is skipped, matched on the SUBJECT so a commit
+    # body that merely mentions the marker cannot silently disable the bump.
+    if: ${{ !startsWith(github.event.head_commit.message || '', 'chore(version)') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
