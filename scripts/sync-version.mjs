@@ -16,70 +16,80 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { getVersion, VERSION_FILES } from './version.mjs';
 
-const version = getVersion();
-const changed = [];
+export async function syncVersion({ quiet = false } = {}) {
+  const version = getVersion();
+  const changed = [];
+  const log = (...args) => { if (!quiet) console.log(...args); };
 
-async function patchJson(file, label, mutate) {
-  const raw = await readFile(file, 'utf8');
-  const data = JSON.parse(raw);
-  if (data.version === version) {
-    console.log(`  = ${label} (${version})`);
-    return;
+  async function patchJson(file, label, mutate) {
+    const raw = await readFile(file, 'utf8');
+    const data = JSON.parse(raw);
+    if (data.version === version) {
+      log(`  = ${label} (${version})`);
+      return;
+    }
+    mutate(data);
+    const next = `${JSON.stringify(data, null, 2)}\n`;
+    if (next === raw) {
+      log(`  = ${label} (${version})`);
+      return;
+    }
+    await writeFile(file, next, 'utf8');
+    changed.push(label);
+    log(`  -> ${label}: ${version}`);
   }
-  mutate(data);
-  const next = `${JSON.stringify(data, null, 2)}\n`;
-  if (next === raw) {
-    console.log(`  = ${label} (${version})`);
-    return;
+
+  async function patchText(file, label, pattern, replacement) {
+    const raw = await readFile(file, 'utf8');
+    if (!pattern.test(raw)) {
+      log(`  ! ${label}: pattern not found, skipped`);
+      return;
+    }
+    const next = raw.replace(pattern, replacement);
+    if (next === raw) {
+      log(`  = ${label} (${version})`);
+      return;
+    }
+    await writeFile(file, next, 'utf8');
+    changed.push(label);
+    log(`  -> ${label}: ${version}`);
   }
-  await writeFile(file, next, 'utf8');
-  changed.push(label);
-  console.log(`  -> ${label}: ${version}`);
+
+  log(`[version] syncing to ${version}`);
+
+  const setVersion = (d) => {
+    d.version = version;
+  };
+
+  await patchJson(VERSION_FILES.rootPackage, 'package.json', setVersion);
+  await patchJson(VERSION_FILES.extensionPackage, 'extension/package.json', setVersion);
+  await patchJson(VERSION_FILES.websitePackage, 'website/package.json', setVersion);
+  await patchJson(VERSION_FILES.chromeManifest, 'extension/public/manifest.json', setVersion);
+  await patchJson(VERSION_FILES.edgeManifest, 'extension/public/manifest.edge.json', setVersion);
+
+  // package-lock carries the package version twice (root + "" entry)
+  await patchJson(VERSION_FILES.extensionLock, 'extension/package-lock.json', (d) => {
+    d.version = version;
+    if (d.packages && d.packages['']) d.packages[''].version = version;
+  });
+
+  await patchText(
+    VERSION_FILES.readme,
+    'README.md badge',
+    /badge\/version-[0-9.]+-emerald/,
+    `badge/version-${version}-emerald`,
+  );
+
+  log(
+    changed.length
+      ? `[version] updated ${changed.length} file(s): ${changed.join(', ')}`
+      : '[version] everything already up to date',
+  );
+
+  return { version, changed };
 }
 
-async function patchText(file, label, pattern, replacement) {
-  const raw = await readFile(file, 'utf8');
-  if (!pattern.test(raw)) {
-    console.log(`  ! ${label}: pattern not found, skipped`);
-    return;
-  }
-  const next = raw.replace(pattern, replacement);
-  if (next === raw) {
-    console.log(`  = ${label} (${version})`);
-    return;
-  }
-  await writeFile(file, next, 'utf8');
-  changed.push(label);
-  console.log(`  -> ${label}: ${version}`);
+// CLI
+if (process.argv[1] && process.argv[1].endsWith('sync-version.mjs')) {
+  await syncVersion();
 }
-
-console.log(`[version] syncing to ${version}`);
-
-const setVersion = (d) => {
-  d.version = version;
-};
-
-await patchJson(VERSION_FILES.rootPackage, 'package.json', setVersion);
-await patchJson(VERSION_FILES.extensionPackage, 'extension/package.json', setVersion);
-await patchJson(VERSION_FILES.websitePackage, 'website/package.json', setVersion);
-await patchJson(VERSION_FILES.chromeManifest, 'extension/public/manifest.json', setVersion);
-await patchJson(VERSION_FILES.edgeManifest, 'extension/public/manifest.edge.json', setVersion);
-
-// package-lock carries the package version twice (root + "" entry)
-await patchJson(VERSION_FILES.extensionLock, 'extension/package-lock.json', (d) => {
-  d.version = version;
-  if (d.packages && d.packages['']) d.packages[''].version = version;
-});
-
-await patchText(
-  VERSION_FILES.readme,
-  'README.md badge',
-  /badge\/version-[0-9.]+-emerald/,
-  `badge/version-${version}-emerald`,
-);
-
-console.log(
-  changed.length
-    ? `[version] updated ${changed.length} file(s): ${changed.join(', ')}`
-    : '[version] everything already up to date',
-);

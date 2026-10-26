@@ -1,0 +1,49 @@
+name: version
+
+# Every push to main gets its own version: the workflow bumps the patch, syncs it
+# across package.json / manifests / README, and commits it back. Vercel then
+# deploys that commit, so the live site and the packaged extension always report
+# the version of the code that is actually deployed.
+#
+# The bot commit carries `[skip version]` so this workflow cannot loop.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: version-bump
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    if: ${{ !contains(github.event.head_commit.message || '', '[skip version]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Bump and sync version
+        run: node scripts/bump-version.mjs
+
+      - name: Commit back to main
+        run: |
+          if git diff --quiet; then
+            echo "version already in sync — nothing to commit"
+            exit 0
+          fi
+          VERSION="$(node scripts/version.mjs)"
+          git config user.name "locatorforge-bot"
+          git config user.email "locatorforge-bot@users.noreply.github.com"
+          git add -A
+          git commit -m "chore(version): v${VERSION} [skip version]"
+          git push

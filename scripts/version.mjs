@@ -1,21 +1,18 @@
 /**
  * Version policy for LocatorForge.
  *
- *   <major>.<minor>.<commitCount>
+ * The version is a plain semver committed in `extension/package.json` — the one
+ * source of truth — and it is bumped automatically on every push to main by
+ * `.github/workflows/version.yml` (scripts/bump-version.mjs), then fanned out to
+ * every consumer by scripts/sync-version.mjs.
  *
- * - `major.minor` is intentional: it lives in `extension/package.json` and is
- *   bumped by hand for a feature/major release.
- * - the patch is the number of commits in the repository, so every push to main
- *   produces a NEW, strictly increasing version. That keeps Chrome/Edge store
- *   uploads valid and means the site can never show a stale number.
- * - `APP_VERSION` overrides everything (CI hotfixes, local experiments).
+ * Both builds inject it at build time (`__APP_VERSION__`), so the website and the
+ * panel footer always render the version of the commit they were built from, and
+ * the packaged extension manifest carries the same number.
  *
- * The generated version is applied to every consumer by scripts/sync-version.mjs
- * and injected into both builds (extension panel + website) at build time, so a
- * deploy and the code it shipped always agree.
+ * `APP_VERSION` overrides everything (hotfix builds, experiments).
  */
-import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -32,29 +29,29 @@ export const VERSION_FILES = {
   readme: resolve(repoRoot, 'README.md'),
 };
 
-function commitCount() {
-  try {
-    const out = execFileSync('git', ['rev-list', '--count', 'HEAD'], {
-      cwd: repoRoot,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-    const n = Number(out);
-    return Number.isFinite(n) && n > 0 ? n : null;
-  } catch {
-    // No git (tarball, some CI checkouts) — fall back to the committed version.
-    return null;
-  }
-}
-
+/** The committed version (or the APP_VERSION override). */
 export function getVersion() {
   const override = process.env.APP_VERSION?.trim();
   if (override) return override;
+  return JSON.parse(readFileSync(VERSION_FILES.extensionPackage, 'utf8')).version;
+}
 
+/**
+ * Increment the source-of-truth version and return it. `part` is one of
+ * patch | minor | major — patch is what CI does on every push.
+ */
+export function bumpVersion(part = 'patch') {
   const pkg = JSON.parse(readFileSync(VERSION_FILES.extensionPackage, 'utf8'));
-  const [major, minor] = String(pkg.version).split('.');
-  const count = commitCount();
-  return count ? `${major}.${minor}.${count}` : String(pkg.version);
+  const [major = 0, minor = 0, patch = 0] = String(pkg.version)
+    .split('.')
+    .map((n) => Number.parseInt(n, 10) || 0);
+
+  const next =
+    part === 'major' ? `${major + 1}.0.0` : part === 'minor' ? `${major}.${minor + 1}.0` : `${major}.${minor}.${patch + 1}`;
+
+  pkg.version = next;
+  writeFileSync(VERSION_FILES.extensionPackage, `${JSON.stringify(pkg, null, 2)}\n`, 'utf8');
+  return next;
 }
 
 // Allow `node scripts/version.mjs` to print the version.

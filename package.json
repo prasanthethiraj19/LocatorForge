@@ -1,11 +1,12 @@
 {
   "name": "locatorforge",
   "private": true,
-  "version": "0.9.11",
+  "version": "0.9.12",
   "description": "LocatorForge — fast Chrome & Edge DevTools extension for Playwright, Selenium, Cypress, WebdriverIO and Robot Framework locators. No ads, no tracking, no BS.",
   "type": "module",
   "scripts": {
     "app:version": "node scripts/version.mjs",
+    "version:bump": "node scripts/bump-version.mjs",
     "version:sync": "node scripts/sync-version.mjs",
     "build:extension": "npm --prefix extension run release",
     "build:website": "cd website && npm run build",

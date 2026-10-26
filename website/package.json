@@ -1,7 +1,7 @@
 {
   "name": "locatorforge-website",
   "private": true,
-  "version": "0.9.11",
+  "version": "0.9.12",
   "description": "LocatorForge marketing site — locatorforge.com",
   "type": "module",
   "scripts": {

@@ -4,7 +4,7 @@
 
 [![Free](https://img.shields.io/badge/Free-Forever-10b981)](https://locatorforge.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-0.9.11-emerald)](./extension/package.json)
+[![Version](https://img.shields.io/badge/version-0.9.12-emerald)](./extension/package.json)
 [![Browsers](https://img.shields.io/badge/browsers-Chrome%20%26%20Edge-blue)](https://locatorforge.com)
 
 **Live site:** [https://locatorforge.vercel.app/]
@@ -166,23 +166,24 @@ build runs.
 
 ### Versioning
 
-The version is **generated from the repository**, never hand-edited:
+Every push to main gets its own version automatically:
 
-```
-<major>.<minor>.<commit count>      e.g. 0.9.11
-```
+- `extension/package.json` holds the semver source of truth.
+- `.github/workflows/version.yml` bumps the patch on every push to main
+  (`node scripts/bump-version.mjs`), syncs it everywhere and commits it back with
+  `[skip version]` so the workflow cannot loop.
+- Both builds inject the version at build time (`__APP_VERSION__`), so the live
+  site and the panel footer render the version of the deployed commit. Nothing to
+  remember, and the live site can never show a stale number.
 
-`major.minor` lives in `extension/package.json` and is bumped by hand for a
-feature release; the patch is the commit count, so **every push to main produces a
-new, strictly increasing version** (safe for Chrome/Edge store uploads).
+Local commands:
 
-- `npm run app:version` — print the version this checkout would build
-- `npm run version:sync` — write it into `package.json`, `extension/package.json`,
-  both extension manifests, `website/package.json`, the lock file and the README badge
-- Both builds inject it at build time (`__APP_VERSION__`), so the site and the
-  panel footer always display the version of the commit they were built from —
-  the live site updates itself on every deploy, nothing to remember.
-- `APP_VERSION=1.2.3` overrides it (hotfix builds).
+- `npm run app:version` — print the current version
+- `npm run version:bump [patch|minor|major|set 1.2.3]` — bump + sync
+- `npm run version:sync` — write the version into `package.json`,
+  `extension/package.json`, both extension manifests, `website/package.json`, the
+  lock file and the README badge
+- `APP_VERSION=1.2.3` overrides the version for a one-off build
 
 Download URLs are stable (`/downloads/locatorforge-chrome.zip`) with a `?v=` cache
 buster, and the zips are rebuilt on every deploy, so the served extension always
