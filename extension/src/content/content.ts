@@ -1,3 +1,5 @@
+import { serializeElement } from '../panel/lib/locators/serialize';
+
 interface PickMessage {
   type: 'PICK_START' | 'PICK_CANCEL';
 }
@@ -27,37 +29,19 @@ function hideOverlay() {
   if (overlay) overlay.style.display = 'none';
 }
 
-function uniqueCssPath(node: Element): string {
-  if (node.id && document.querySelectorAll('#' + CSS.escape(node.id)).length === 1) {
-    return '#' + CSS.escape(node.id);
+function deepTarget(e: Event): Element | null {
+  const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
+  for (const n of path) {
+    if (n && (n as Node).nodeType === 1) return n as Element;
   }
-  const parts: string[] = [];
-  let cur: Element | null = node;
-  while (cur && cur.nodeType === 1 && cur !== document.body) {
-    const elNode: Element = cur;
-    let s = elNode.tagName.toLowerCase();
-    const id = (elNode as HTMLElement).id;
-    if (id && document.querySelectorAll('#' + CSS.escape(id)).length === 1) {
-      parts.unshift('#' + CSS.escape(id));
-      return parts.join(' > ');
-    }
-    const parent: HTMLElement | null = elNode.parentElement;
-    if (parent) {
-      const sib: Element[] = Array.from(parent.children).filter(
-        (c: Element) => c.tagName === elNode.tagName,
-      );
-      if (sib.length > 1) s += ':nth-of-type(' + (sib.indexOf(elNode) + 1) + ')';
-    }
-    parts.unshift(s);
-    cur = parent;
-  }
-  return parts.join(' > ') || node.tagName.toLowerCase();
+  const t = e.target as Element | null;
+  return t && t.nodeType === 1 ? t : null;
 }
 
 function onMove(e: MouseEvent) {
   if (!active) return;
-  const t = e.target as Element | null;
-  if (t && t.nodeType === 1) moveOverlay(t);
+  const t = deepTarget(e);
+  if (t) moveOverlay(t);
 }
 
 function onClick(e: MouseEvent) {
@@ -65,11 +49,21 @@ function onClick(e: MouseEvent) {
   e.preventDefault();
   e.stopImmediatePropagation();
   e.stopPropagation();
-  const t = e.target as Element | null;
-  if (!t) return;
-  const path = uniqueCssPath(t);
+  const t = deepTarget(e);
+  let element: unknown = null;
+  if (t) {
+    try {
+      element = serializeElement(t);
+    } catch (err) {
+      console.error('[LocatorForge] pick serialize failed', err);
+      element = null;
+    }
+  }
+  // Always exit pick mode on click — a click is a definitive action, even if it
+  // landed on a non-element node (scrollbar, empty document). This guarantees
+  // the overlay never lingers.
   stop();
-  chrome.runtime.sendMessage({ type: 'PICK_RESULT', element: { cssPath: path } }).catch(() => {});
+  chrome.runtime.sendMessage({ type: 'PICK_RESULT', element, frameUrl: location.href }).catch(() => {});
 }
 
 function onKey(e: KeyboardEvent) {

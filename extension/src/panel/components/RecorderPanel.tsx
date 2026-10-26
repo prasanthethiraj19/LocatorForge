@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import type { FrameworkDef } from '../lib/locators/types';
 import type { RecordedStep } from '../lib/recorder/types';
 import { emitAll, buildTestFile, buildPomFile, defaultFilename, defaultPomFilename } from '../lib/recorder/recorder';
+import { pageKeyFromUrl, suggestClassName } from '../lib/pom/naming';
 
 export interface RecorderPanelProps {
   open: boolean;
@@ -9,6 +10,7 @@ export interface RecorderPanelProps {
   steps: RecordedStep[];
   framework: FrameworkDef;
   testIdAttribute: string;
+  inspectedUrl: string;
   onStart: () => void;
   onStop: () => void;
   onClear: () => void;
@@ -37,6 +39,7 @@ export function RecorderPanel({
   steps,
   framework,
   testIdAttribute,
+  inspectedUrl,
   onStart,
   onStop,
   onClear,
@@ -50,12 +53,21 @@ export function RecorderPanel({
     [steps, framework, testIdAttribute],
   );
 
+  // A Page Object belongs to one page, so a recording that crossed pages emits
+  // this page's steps only — never a mix of previous pages' actions.
+  const pageKey = pageKeyFromUrl(inspectedUrl);
+  const className = suggestClassName(inspectedUrl);
+  const pomSteps = useMemo(
+    () => steps.filter((s) => !s.pageKey || s.pageKey === pageKey),
+    [steps, pageKey],
+  );
+
   const code = useMemo(() => {
     if (!steps.length) return '';
     return shape === 'pom'
-      ? buildPomFile(steps, framework, testIdAttribute)
+      ? buildPomFile(pomSteps, framework, testIdAttribute, className, inspectedUrl || '/')
       : buildTestFile(steps, framework, testIdAttribute);
-  }, [steps, framework, testIdAttribute, shape]);
+  }, [steps, pomSteps, framework, testIdAttribute, shape, className, inspectedUrl]);
 
   if (!open) return null;
 
@@ -69,7 +81,7 @@ export function RecorderPanel({
 
   function handleDownload() {
     const filename =
-      shape === 'pom' ? defaultPomFilename(framework) : defaultFilename(framework);
+      shape === 'pom' ? defaultPomFilename(framework, className) : defaultFilename(framework);
     const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -138,7 +150,7 @@ export function RecorderPanel({
               <div className="qlc-rec-code-head">
                 <span>
                   {shape === 'pom'
-                    ? `Page object · ${framework.label}`
+                    ? `Page object ${className} · ${framework.label}`
                     : `Generated test · ${framework.label}`}
                 </span>
                 <div className="qlc-rec-shape">
@@ -158,7 +170,7 @@ export function RecorderPanel({
                   </button>
                 </div>
               </div>
-              <pre className="qlc-rec-code"><code>{code}</code></pre>
+              <pre className="qlc-rec-code"><code>{code || (shape === 'pom' ? `// No steps recorded on this page yet — ${className} stays empty.` : '')}</code></pre>
             </div>
           )}
         </div>

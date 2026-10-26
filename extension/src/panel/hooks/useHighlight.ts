@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import type { Candidate } from '../lib/locators/types';
-import { buildCountSnippet } from '../lib/locators/generate';
+import { buildCountSnippet, runtimePrelude } from '../lib/locators/generate';
 
 export function useHighlight(testIdAttribute: string) {
   const flash = useCallback(
@@ -8,6 +8,7 @@ export function useHighlight(testIdAttribute: string) {
       const countExpr = buildCountSnippet(c, { testIdAttribute, showSmartPatterns: true, showAxes: true, selfHealing: false });
       const code = `
         (function(){
+          ${runtimePrelude(c)}
           var prev = document.querySelectorAll('[data-qlc-flash]');
           prev.forEach(function(p){ p.removeAttribute('data-qlc-flash'); p.style.outline=''; p.style.boxShadow=''; });
           try {
@@ -45,15 +46,21 @@ export function useHighlight(testIdAttribute: string) {
 
 function snippetSelector(c: Candidate, testIdAttr: string): string {
   switch (c.kind) {
-    case 'role':
-      return `var sel='${roleSelectorFor(c.args.role || '')}';return Array.from(document.querySelectorAll(sel));`;
+    case 'role': {
+      const sel = roleSelectorFor(c.args.role || '');
+      if (c.args.name) {
+        const q = JSON.stringify((c.args.name || '').toLowerCase());
+        return `var q=${q};return Array.from(document.querySelectorAll(${JSON.stringify(sel)})).filter(function(e){return __qlcName(e).toLowerCase()===q;});`;
+      }
+      return `var sel='${sel}';return Array.from(document.querySelectorAll(sel));`;
+    }
     case 'role-nth': {
       const sel = roleSelectorFor(c.args.role || '');
       const idx = Number(c.args.index || '0');
       const name = c.args.name;
       if (name) {
         const q = JSON.stringify(name.toLowerCase());
-        return `var q=${q};var c=0;var out=[];Array.from(document.querySelectorAll(${JSON.stringify(sel)})).forEach(function(e){var t=((e.textContent||'')+' '+(e.getAttribute('aria-label')||'')+' '+(e.getAttribute('alt')||'')+' '+(e.getAttribute('title')||'')+' '+(e.getAttribute('placeholder')||'')+' '+(e.getAttribute('value')||'')).replace(/\\s+/g,' ').trim().toLowerCase();if(t===q){if(c===${idx})out.push(e);c++}});return out;`;
+        return `var q=${q};var c=0;var out=[];Array.from(document.querySelectorAll(${JSON.stringify(sel)})).forEach(function(e){if(__qlcName(e).toLowerCase()===q){if(c===${idx})out.push(e);c++}});return out;`;
       }
       return `var all=Array.from(document.querySelectorAll(${JSON.stringify(sel)}));return all.length>${idx}?[all[${idx}]]:[];`;
     }
@@ -61,7 +68,7 @@ function snippetSelector(c: Candidate, testIdAttr: string): string {
       const a = c.args.anchor || '';
       const sel = roleSelectorFor(c.args.role || '');
       if (c.args.name) {
-        return `var q=${JSON.stringify((c.args.name || '').toLowerCase())};var out=[];document.querySelectorAll(${JSON.stringify(a)}).forEach(function(scope){scope.querySelectorAll(${JSON.stringify(sel)}).forEach(function(e){var t=((e.textContent||'')+' '+(e.getAttribute('aria-label')||'')+' '+(e.getAttribute('alt')||'')+' '+(e.getAttribute('title')||'')+' '+(e.getAttribute('placeholder')||'')+' '+(e.getAttribute('value')||'')).replace(/\\s+/g,' ').trim().toLowerCase();if(t===q)out.push(e)})});return out;`;
+        return `var q=${JSON.stringify((c.args.name || '').toLowerCase())};var out=[];document.querySelectorAll(${JSON.stringify(a)}).forEach(function(scope){scope.querySelectorAll(${JSON.stringify(sel)}).forEach(function(e){if(__qlcName(e).toLowerCase()===q)out.push(e)})});return out;`;
       }
       return `var out=[];document.querySelectorAll(${JSON.stringify(a)}).forEach(function(scope){out.push.apply(out,Array.from(scope.querySelectorAll(${JSON.stringify(sel)})))});return out;`;
     }
@@ -91,6 +98,8 @@ function snippetSelector(c: Candidate, testIdAttr: string): string {
     case 'id':
     case 'smart-id':
       return `try{return Array.from(document.querySelectorAll('#'+CSS.escape(${JSON.stringify(c.args.value || '')})));}catch(e){return [];}`;
+    case 'svg':
+      return `try{return Array.from(document.querySelectorAll(${JSON.stringify(c.args.value || '')}));}catch(e){return [];}`;
     case 'css':
       return `try{return Array.from(document.querySelectorAll(${JSON.stringify(c.cssOrXPath || '')}));}catch(e){return [];}`;
     case 'xpath':

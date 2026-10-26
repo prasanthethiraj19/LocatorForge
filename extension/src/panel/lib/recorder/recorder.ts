@@ -361,7 +361,7 @@ export function buildPomFile(
     if (!key || seen.has(key)) continue;
     seen.add(key);
     const { candidate } = emitStep(s, framework, testIdAttribute);
-    items.push({ id: s.id, fieldName: suggestFieldName(candidate), candidate, addedAt: s.timestamp });
+    items.push({ id: s.id, fieldName: suggestFieldName(candidate), candidate, addedAt: s.timestamp, pageKey: '' });
   }
   return generatePom(items, { className, framework: framework.id, url });
 }
@@ -369,21 +369,21 @@ export function buildPomFile(
 /**
  * Pick a sensible filename for a downloaded Page Object file.
  */
-export function defaultPomFilename(framework: FrameworkDef): string {
+export function defaultPomFilename(framework: FrameworkDef, className = 'RecordedPage'): string {
   const fam = framework.family;
   const lang = framework.language;
   if (fam === 'playwright' || fam === 'cypress' || fam === 'webdriverio') {
-    if (lang === 'TypeScript') return 'RecordedPage.ts';
-    if (lang === 'JavaScript') return 'RecordedPage.js';
-    if (lang === 'Python') return 'RecordedPage.py';
-    if (lang === 'Java') return 'RecordedPage.java';
+    if (lang === 'TypeScript') return `${className}.ts`;
+    if (lang === 'JavaScript') return `${className}.js`;
+    if (lang === 'Python') return `${className}.py`;
+    if (lang === 'Java') return `${className}.java`;
   }
   if (fam === 'selenium') {
-    if (lang === 'Java') return 'RecordedPage.java';
-    if (lang === 'Python') return 'RecordedPage.py';
+    if (lang === 'Java') return `${className}.java`;
+    if (lang === 'Python') return `${className}.py`;
   }
-  if (fam === 'robot') return 'RecordedPage.robot';
-  return 'RecordedPage.txt';
+  if (fam === 'robot') return `${className}.robot`;
+  return `${className}.txt`;
 }
 
 /**

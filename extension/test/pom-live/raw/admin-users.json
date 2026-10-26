@@ -1,0 +1,219 @@
+{
+  "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers",
+  "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers",
+  "className": "AdminViewSystemUsersPage",
+  "skipped": [],
+  "fieldNames": [
+    "headingAdmin",
+    "textboxTypeForHints",
+    "buttonSearch",
+    "rowgroup",
+    "row",
+    "select"
+  ],
+  "kinds": [
+    "role",
+    "role",
+    "role",
+    "role",
+    "role",
+    "text"
+  ],
+  "locators": [
+    {
+      "role": "heading",
+      "name": "Admin"
+    },
+    {
+      "role": "textbox",
+      "name": "Type for hints..."
+    },
+    {
+      "role": "button",
+      "name": "Search"
+    },
+    {
+      "role": "rowgroup"
+    },
+    {
+      "role": "row"
+    },
+    {
+      "value": "-- Select --"
+    }
+  ],
+  "items": [
+    {
+      "id": "1",
+      "fieldName": "headingAdmin",
+      "candidate": {
+        "kind": "role",
+        "rank": 1,
+        "args": {
+          "role": "heading",
+          "name": "Admin"
+        },
+        "matchCount": 0,
+        "isUnique": false,
+        "stability": "fragile",
+        "section": "recommended",
+        "description": "role=heading, name=\"Admin\"",
+        "lints": [
+          {
+            "rule": "no-match",
+            "severity": "warn",
+            "message": "Matches zero elements on current page — check input or page state."
+          }
+        ],
+        "rationale": "Matches zero elements on current page — check input or page state."
+      },
+      "addedAt": 1792987481903,
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers"
+    },
+    {
+      "id": "2",
+      "fieldName": "textboxTypeForHints",
+      "candidate": {
+        "kind": "role",
+        "rank": 1,
+        "args": {
+          "role": "textbox",
+          "name": "Type for hints..."
+        },
+        "matchCount": 0,
+        "isUnique": false,
+        "stability": "fragile",
+        "section": "recommended",
+        "description": "role=textbox, name=\"Type for hints...\"",
+        "lints": [
+          {
+            "rule": "no-match",
+            "severity": "warn",
+            "message": "Matches zero elements on current page — check input or page state."
+          }
+        ],
+        "rationale": "Matches zero elements on current page — check input or page state."
+      },
+      "addedAt": 1792987481906,
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers"
+    },
+    {
+      "id": "3",
+      "fieldName": "buttonSearch",
+      "candidate": {
+        "kind": "role",
+        "rank": 1,
+        "args": {
+          "role": "button",
+          "name": "Search"
+        },
+        "matchCount": 0,
+        "isUnique": false,
+        "stability": "fragile",
+        "section": "recommended",
+        "description": "role=button, name=\"Search\"",
+        "lints": [
+          {
+            "rule": "no-match",
+            "severity": "warn",
+            "message": "Matches zero elements on current page — check input or page state."
+          }
+        ],
+        "rationale": "Matches zero elements on current page — check input or page state."
+      },
+      "addedAt": 1792987481909,
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers"
+    },
+    {
+      "id": "4",
+      "fieldName": "rowgroup",
+      "candidate": {
+        "kind": "role",
+        "rank": 1,
+        "args": {
+          "role": "rowgroup"
+        },
+        "matchCount": 0,
+        "isUnique": false,
+        "stability": "fragile",
+        "section": "recommended",
+        "description": "role=rowgroup",
+        "lints": [
+          {
+            "rule": "role-no-name",
+            "severity": "info",
+            "message": "role without accessible name — ambiguous if multiple of same role exist."
+          },
+          {
+            "rule": "no-match",
+            "severity": "warn",
+            "message": "Matches zero elements on current page — check input or page state."
+          }
+        ],
+        "rationale": "Matches zero elements on current page — check input or page state."
+      },
+      "addedAt": 1792987481923,
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers"
+    },
+    {
+      "id": "5",
+      "fieldName": "row",
+      "candidate": {
+        "kind": "role",
+        "rank": 1,
+        "args": {
+          "role": "row"
+        },
+        "matchCount": 0,
+        "isUnique": false,
+        "stability": "fragile",
+        "section": "recommended",
+        "description": "role=row",
+        "lints": [
+          {
+            "rule": "role-no-name",
+            "severity": "info",
+            "message": "role without accessible name — ambiguous if multiple of same role exist."
+          },
+          {
+            "rule": "no-match",
+            "severity": "warn",
+            "message": "Matches zero elements on current page — check input or page state."
+          }
+        ],
+        "rationale": "Matches zero elements on current page — check input or page state."
+      },
+      "addedAt": 1792987481933,
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers"
+    },
+    {
+      "id": "6",
+      "fieldName": "select",
+      "candidate": {
+        "kind": "text",
+        "rank": 4,
+        "args": {
+          "value": "-- Select --"
+        },
+        "matchCount": 0,
+        "isUnique": false,
+        "stability": "fragile",
+        "section": "alternative",
+        "description": "By text \"-- Select --\"",
+        "lints": [
+          {
+            "rule": "no-match",
+            "severity": "warn",
+            "message": "Matches zero elements on current page — check input or page state."
+          }
+        ],
+        "rationale": "Matches zero elements on current page — check input or page state."
+      },
+      "addedAt": 1792987481938,
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers"
+    }
+  ],
+  "code": "import { type Locator, type Page } from '@playwright/test';\n\nexport class AdminViewSystemUsersPage {\n  readonly page: Page;\n  readonly headingAdmin: Locator;\n  readonly textboxTypeForHints: Locator;\n  readonly buttonSearch: Locator;\n  readonly rowgroup: Locator;\n  readonly row: Locator;\n  readonly select: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    this.headingAdmin = page.getByRole(\"heading\", { name: \"Admin\" });\n    this.textboxTypeForHints = page.getByRole(\"textbox\", { name: \"Type for hints...\" });\n    this.buttonSearch = page.getByRole(\"button\", { name: \"Search\" });\n    this.rowgroup = page.getByRole(\"rowgroup\");\n    this.row = page.getByRole(\"row\");\n    this.select = page.getByText(\"-- Select --\");\n  }\n\n  async goto() {\n    await this.page.goto(\"https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers\");\n  }\n}\n",
+  "requestedUrl": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers",
+  "capturedUrl": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers"
+}

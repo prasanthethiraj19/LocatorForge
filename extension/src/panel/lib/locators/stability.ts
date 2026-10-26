@@ -14,6 +14,7 @@ const KIND_BASE: Record<AnyLocatorKind, { stability: Stability; section: Section
   text: { stability: 'good', section: 'alternative' },
   title: { stability: 'ok', section: 'alternative' },
   name: { stability: 'good', section: 'alternative' },
+  svg: { stability: 'good', section: 'alternative' },
   chained: { stability: 'good', section: 'alternative' },
   css: { stability: 'ok', section: 'fallback' },
   xpath: { stability: 'ok', section: 'fallback' },

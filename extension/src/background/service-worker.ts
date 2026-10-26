@@ -124,6 +124,10 @@ chrome.runtime.onMessage.addListener((msg: ContentToWorker | RecorderEvent, send
 
   if (msg.type === 'PICK_RESULT') {
     broadcastPanel(tabId, { type: 'PICK_RESULT', element: msg.element });
+    // The content script is injected into every frame, so a pick in one frame
+    // must tear down the picker in all the others (otherwise their overlays and
+    // click capture keep intercepting input).
+    chrome.tabs.sendMessage(tabId, { type: 'PICK_CANCEL' }).catch(() => {});
   } else if (msg.type === 'FREEZE_STATE') {
     broadcastPanel(tabId, { type: 'FREEZE_STATE', frozen: msg.frozen });
   } else if (msg.type === 'REC_EVENT') {

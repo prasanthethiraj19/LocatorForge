@@ -15,6 +15,8 @@ export interface RecordedStep {
   /** For `fill` this is the typed text. For `select` this is the option label/value. For `press` this is the key. */
   value?: string;
   timestamp: number;
+  /** Page the step was captured on, so a multi-page recording can be split per page. */
+  pageKey?: string;
 }
 
 export type RecorderStatus = 'idle' | 'recording' | 'stopped';

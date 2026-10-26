@@ -14,6 +14,7 @@
     "package:edge": "node scripts/package.mjs --target=edge",
     "release": "npm run build:chrome && npm run build:edge && npm run package:chrome && npm run package:edge",
     "typecheck": "tsc --noEmit",
+    "test:fixtures": "esbuild test/harness.ts --bundle --format=iife --outfile=test/harness.js --target=chrome116",
     "clean": "rm -rf dist"
   },
   "dependencies": {

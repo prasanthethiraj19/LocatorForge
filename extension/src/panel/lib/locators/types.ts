@@ -32,6 +32,7 @@ export type LocatorKind =
   | 'testid'
   | 'id'
   | 'name'
+  | 'svg'
   | 'css'
   | 'xpath'
   | 'xpathAbs'

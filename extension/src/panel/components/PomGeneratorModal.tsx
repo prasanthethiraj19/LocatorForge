@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { PomItem } from '../lib/pom/types';
 import type { FrameworkId } from '../lib/locators/types';
 import { FRAMEWORKS } from '../lib/locators/frameworks';
 import { generatePom } from '../lib/pom/generate';
+import { pageKeyFromUrl, suggestClassName } from '../lib/pom/naming';
 
 interface Props {
   open: boolean;
@@ -23,15 +24,27 @@ export function PomGeneratorModal({
   defaultFramework,
   inspectedUrl,
 }: Props) {
-  const [className, setClassName] = useState('LoginPage');
+  const [className, setClassName] = useState(() => suggestClassName(inspectedUrl));
   const [framework, setFramework] = useState<FrameworkId>(defaultFramework);
   const [url, setUrl] = useState(inspectedUrl);
   const [packageName, setPackageName] = useState('com.example.pages');
   const [copied, setCopied] = useState(false);
+  const classNameTouchedRef = useRef(false);
+  const lastPageKeyRef = useRef(pageKeyFromUrl(inspectedUrl));
 
+  // Each page owns its own Page Object: moving to a new URL swaps in a fresh
+  // class name so the previous page's class never leaks into this one.
   useEffect(() => {
-    if (open) setUrl(inspectedUrl);
-  }, [open, inspectedUrl]);
+    const pageKey = pageKeyFromUrl(inspectedUrl);
+    if (lastPageKeyRef.current !== pageKey) {
+      lastPageKeyRef.current = pageKey;
+      classNameTouchedRef.current = false;
+      setClassName(suggestClassName(inspectedUrl));
+    } else if (!classNameTouchedRef.current) {
+      setClassName(suggestClassName(inspectedUrl));
+    }
+    setUrl(inspectedUrl);
+  }, [inspectedUrl]);
 
   const code = useMemo(() => {
     if (!items.length) return '';
@@ -79,7 +92,10 @@ export function PomGeneratorModal({
               <input
                 type="text"
                 value={className}
-                onChange={(e) => setClassName(e.target.value || 'PageObject')}
+                onChange={(e) => {
+                  classNameTouchedRef.current = true;
+                  setClassName(e.target.value || 'PageObject');
+                }}
                 spellCheck={false}
               />
             </label>

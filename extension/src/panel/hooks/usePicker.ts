@@ -21,10 +21,29 @@ export function usePicker(opts: UsePickerOpts = {}) {
       port.onMessage.addListener((msg: WorkerToPanel) => {
         if (msg.type === 'PICK_RESULT') {
           setPicking(false);
-          const el = msg.element as { cssPath?: string } | null;
-          // Read picked element data directly via querySelector — no inspect() so DevTools stays on LocatorForge.
+          const el = msg.element as (SerializedElement & { cssPath?: string }) | null;
+          // The content script now serializes the picked element in its own
+          // frame (works for iframes, nested frames and shadow roots), so use
+          // the payload directly when present.
+          if (el && typeof el.tag === 'string' && el.attrs) {
+            onPickedRef.current?.(el as SerializedElement);
+            return;
+          }
+          // Fallback (older content script): re-resolve a `host >> inner` path.
           if (el?.cssPath) {
-            const code = `${SERIALIZE_FN_SOURCE}\n__qlcSerialize(document.querySelector(${JSON.stringify(el.cssPath)}))`;
+            const code = `${SERIALIZE_FN_SOURCE}
+(function(){
+  var parts = ${JSON.stringify(el.cssPath)}.split('>>').map(function(s){ return s.trim(); }).filter(Boolean);
+  var root = document;
+  var node = null;
+  for (var i = 0; i < parts.length; i++) {
+    var found = root.querySelectorAll(parts[i]);
+    if (!found.length) return null;
+    node = found[0];
+    if (i < parts.length - 1) root = node.shadowRoot || node;
+  }
+  return __qlcSerialize(node);
+})()`;
             try {
               chrome.devtools.inspectedWindow.eval(code, (result, exc) => {
                 if (exc || !result) {

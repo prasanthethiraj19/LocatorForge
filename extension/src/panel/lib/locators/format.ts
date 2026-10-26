@@ -25,6 +25,10 @@ function quote(s: string, lang: Lang): string {
 export function formatExpression(c: Candidate, ctx: FormatContext): string {
   const base = formatBare(c, ctx);
   let result = base;
+  // Shadow chain is innermost (the element itself), frame chain outermost.
+  if (c.shadowChain && c.shadowChain.length) {
+    result = applyShadowWrap(result, c.shadowChain, ctx);
+  }
   if (ctx.withFrameLocator !== false && c.frameChain && c.frameChain.length) {
     result = applyFrameWrap(result, c.frameChain, ctx);
   }
@@ -32,6 +36,43 @@ export function formatExpression(c: Candidate, ctx: FormatContext): string {
     result = applyHealing(result, c, ctx);
   }
   return result;
+}
+
+/**
+ * Wraps a base locator so it resolves through one or more open shadow roots.
+ * Playwright pierces open shadow DOM natively, so chaining .locator(host) is
+ * the idiomatic form; other families get their native shadow traversal, and
+ * frameworks without a first-class API get a descriptive comment.
+ */
+function applyShadowWrap(expr: string, chain: string[], ctx: FormatContext): string {
+  const fam = ctx.framework.family;
+  const lang = ctx.framework.language;
+  if (fam === 'playwright') {
+    const prefix = chain.map((h) => `.locator(${quote(h, lang)})`).join('');
+    return expr.replace(/^page/, `page${prefix}`);
+  }
+  if (fam === 'selenium') {
+    if (lang === 'Java') {
+      let p = `driver.findElement(By.cssSelector(${quoteJava(chain[0])}))`;
+      for (let i = 1; i < chain.length; i++) p += `.getShadowRoot().findElement(By.cssSelector(${quoteJava(chain[i])}))`;
+      return `${p}.getShadowRoot().${expr.replace(/^driver\./, '')}`;
+    }
+    let p = `driver.find_element(By.CSS_SELECTOR, ${quotePython(chain[0])})`;
+    for (let i = 1; i < chain.length; i++) p += `.shadow_root.find_element(By.CSS_SELECTOR, ${quotePython(chain[i])})`;
+    return `${p}.shadow_root.${expr.replace(/^driver\./, '')}`;
+  }
+  if (fam === 'cypress') {
+    let p = `cy.get(${quoteJS(chain[0])})`;
+    for (let i = 1; i < chain.length; i++) p += `.shadow().find(${quoteJS(chain[i])})`;
+    return `${p}.shadow().${expr.replace(/^cy\./, '')}`;
+  }
+  if (fam === 'webdriverio') {
+    let p = `await $(${quoteJS(chain[0])})`;
+    for (let i = 1; i < chain.length; i++) p += `.shadow$(${quoteJS(chain[i])})`;
+    return `${p}.shadow$(` + expr.replace(/^await \$\(/, '').replace(/\)$/, '') + ')';
+  }
+  // Robot Framework has no direct shadow traversal — describe the chain.
+  return `# inside shadow root: ${chain.join(' > ')}\n${expr}`;
 }
 
 function formatBare(c: Candidate, ctx: FormatContext): string {
@@ -79,8 +120,13 @@ function applyFrameWrap(expr: string, chain: string[], ctx: FormatContext): stri
     return expr.replace(/^page\./, `page${wrappers}.`);
   }
   if (fam === 'cypress') {
-    // cy.iframe('iframe').find(...)
-    return `cy.iframe(${quote(chain[chain.length - 1], 'JavaScript')}).find(${quote('TODO', 'JavaScript')}) /* nested: ${expr} */`;
+    // cypress-iframe plugin: cy.iframe('sel').iframe('nested').find(...).
+    // cy.get() is unscoped, so inside a frame body it becomes .find().
+    const iframes = chain
+      .map((sel, i) => (i === 0 ? `cy.iframe(${quote(sel, 'JavaScript')})` : `iframe(${quote(sel, 'JavaScript')})`))
+      .join('.');
+    const inner = expr.replace(/^cy\.get\(/, 'find(').replace(/^cy\./, '');
+    return `${iframes}.${inner}`;
   }
   if (fam === 'selenium') {
     const head = lang === 'Python' ? '# switch into iframe first' : '// switch into iframe first';
@@ -208,6 +254,8 @@ function formatPlaywright(c: Candidate, lang: Lang): string {
       return `${page}locator(${q('#' + (c.args.value || ''))})`;
     case 'name':
       return `${page}locator(${q(`[name=${JSON.stringify(c.args.value || '')}]`)})`;
+    case 'svg':
+      return `${page}locator(${q(c.args.value || '')})`;
     case 'css':
     case 'xpath':
     case 'xpathAbs':
@@ -307,6 +355,8 @@ function formatSelenium(c: Candidate, lang: Lang): string {
       return by('id', c.args.value || '');
     case 'name':
       return by('name', c.args.value || '');
+    case 'svg':
+      return by('cssSelector', c.args.value || '');
     case 'testid':
       return by('cssSelector', `[data-testid=${JSON.stringify(c.args.value || '')}]`);
     case 'role': {
@@ -529,6 +579,8 @@ function formatCypress(c: Candidate): string {
       return `cy.get(${quoteJS(`#${c.args.value || ''}`)})`;
     case 'name':
       return `cy.get(${quoteJS(`[name=${JSON.stringify(c.args.value || '')}]`)})`;
+    case 'svg':
+      return `cy.get(${quoteJS(c.args.value || '')})`;
     case 'css':
       return `cy.get(${quoteJS(c.cssOrXPath || '')})`;
     case 'xpath':
@@ -616,6 +668,8 @@ function formatWdio(c: Candidate): string {
       return `await $(${quoteJS('#' + (c.args.value || ''))})`;
     case 'name':
       return `await $(${quoteJS(`[name=${JSON.stringify(c.args.value || '')}]`)})`;
+    case 'svg':
+      return `await $(${quoteJS(c.args.value || '')})`;
     case 'css':
       return `await $(${quoteJS(c.cssOrXPath || '')})`;
     case 'xpath':
@@ -659,6 +713,8 @@ function formatRobot(c: Candidate): string {
       return `id:${c.args.value || ''}`;
     case 'name':
       return `name:${c.args.value || ''}`;
+    case 'svg':
+      return `css:${c.args.value || ''}`;
     case 'testid':
       return `css:[data-testid="${c.args.value || ''}"]`;
     case 'placeholder':

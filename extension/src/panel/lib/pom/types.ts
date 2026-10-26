@@ -5,6 +5,7 @@ export interface PomItem {
   fieldName: string;
   candidate: Candidate;
   addedAt: number;
+  pageKey: string;
 }
 
 export interface PomConfig {

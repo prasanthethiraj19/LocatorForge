@@ -1,0 +1,64 @@
+[
+  {
+    "slug": "login",
+    "url": "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login",
+    "className": "LoginPage",
+    "fields": [
+      "textboxUsername",
+      "textboxPassword",
+      "buttonLogin",
+      "forgotYourPassword",
+      "imgCompanyBranding",
+      "link"
+    ]
+  },
+  {
+    "slug": "dashboard",
+    "url": "https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index",
+    "className": "DashboardPage",
+    "fields": [
+      "headingDashboard",
+      "textboxSearch",
+      "linkAdmin",
+      "mandaUser",
+      "imgClientBrandBanner"
+    ]
+  },
+  {
+    "slug": "pim-employees",
+    "url": "https://opensource-demo.orangehrmlive.com/web/index.php/pim/viewEmployeeList",
+    "className": "PimViewEmployeeListPage",
+    "fields": [
+      "headingPim",
+      "textboxTypeForHints",
+      "textboxSearch",
+      "buttonSearch",
+      "rowgroup",
+      "row"
+    ]
+  },
+  {
+    "slug": "leave-list",
+    "url": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/viewLeaveList",
+    "className": "LeaveViewLeaveListPage",
+    "fields": [
+      "headingLeave",
+      "buttonSearch",
+      "rowgroup",
+      "textboxYyyyDdMm"
+    ]
+  },
+  {
+    "slug": "admin-users",
+    "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers",
+    "className": "AdminViewSystemUsersPage",
+    "fields": [
+      "headingAdmin",
+      "textboxTypeForHints",
+      "buttonSearch",
+      "rowgroup",
+      "row",
+      "select"
+    ]
+  }
+]

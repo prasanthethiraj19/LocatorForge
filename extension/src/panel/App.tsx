@@ -43,10 +43,10 @@ export default function App() {
   const [cleared, setCleared] = useState(false);
   const test = useTestLocator();
   const { flash } = useHighlight(testIdAttribute);
-  const basket = usePomBasket();
-  const inspectedUrl = useInspectedUrl();
+  const { url: inspectedUrl, refresh: refreshInspectedUrl } = useInspectedUrl();
+  const basket = usePomBasket(inspectedUrl);
   const history = useLocatorHistory(element, inspectedUrl);
-  const recorder = useRecorder();
+  const recorder = useRecorder(inspectedUrl);
   const freeze = useFreeze();
 
   const framework = getFramework(frameworkId);
@@ -86,6 +86,12 @@ export default function App() {
     basket.add(c);
   }
 
+  /** The Page Object's class name/URL come from the page — never open it on a stale read. */
+  function openPom() {
+    refreshInspectedUrl();
+    setPomOpen(true);
+  }
+
   function toggleRecord() {
     if (recorder.recording) {
       recorder.stop();
@@ -110,7 +116,7 @@ export default function App() {
         copyTop();
       } else if (meta && e.shiftKey && (e.key === 'P' || e.key === 'p')) {
         e.preventDefault();
-        if (basket.items.length) setPomOpen(true);
+        if (basket.items.length) openPom();
       } else if (meta && e.shiftKey && (e.key === 'H' || e.key === 'h')) {
         e.preventDefault();
         setHistoryOpen(true);
@@ -187,7 +193,7 @@ export default function App() {
         <EmptyState error={error} />
       )}
 
-      <PomBasketBar items={basket.items} onOpen={() => setPomOpen(true)} onClear={basket.clear} />
+      <PomBasketBar items={basket.items} onOpen={openPom} onClear={basket.clear} />
 
       <div className="qlc-footer">
         <div className="qlc-footer-meta">
@@ -234,6 +240,7 @@ export default function App() {
         steps={recorder.steps}
         framework={framework}
         testIdAttribute={testIdAttribute}
+        inspectedUrl={inspectedUrl}
         onStart={recorder.start}
         onStop={recorder.stop}
         onClear={recorder.clear}

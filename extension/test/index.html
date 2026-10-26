@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>LocatorForge test page — frames / shadow DOM / SVG</title>
+    <style>
+      body { font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; margin: 24px; color: #1c1917; }
+      h1 { font-size: 18px; } h2 { font-size: 15px; margin-top: 20px; }
+      .pass { color: #047857; } .fail { color: #b91c1c; }
+      table { border-collapse: collapse; margin-top: 12px; font-size: 12px; }
+      td, th { border: 1px solid #d6d3d1; padding: 3px 8px; text-align: left; vertical-align: top; }
+      code, pre { background: #f5f5f4; border-radius: 3px; }
+      code { padding: 1px 4px; }
+      pre { padding: 12px; overflow: auto; max-height: 420px; font-size: 11px; }
+      .badge { font-weight: 700; }
+      iframe { border: 1px solid #d6d3d1; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <h1>LocatorForge test page — frames / shadow DOM / SVG</h1>
+    <p>
+      Open DevTools → Elements, click any element below, watch the LocatorForge panel emit
+      <code>frameLocator()</code> / <code>.locator()</code> chains and live counts.
+      The report below auto-runs the engine against these fixtures.
+    </p>
+
+    <button id="top-btn" data-testid="top">Top Button</button>
+
+    <svg id="close-icon" role="img" aria-label="Close dialog" viewBox="0 0 10 10" width="20" height="20">
+      <path d="M0 0 L10 10" />
+    </svg>
+
+    <svg role="img" aria-label="Search icon" viewBox="0 0 10 10" width="20" height="20">
+      <circle cx="5" cy="5" r="4" />
+    </svg>
+
+    <div id="host"></div>
+
+    <p>
+      <iframe id="outer" name="outer-frame" src="frame.html" width="420" height="220"></iframe>
+    </p>
+
+    <h2 id="summary">Report: waiting…</h2>
+    <div id="out"></div>
+
+    <script>
+      // Nested open shadow DOM: #host > #host2 (two shadow boundaries).
+      const host = document.getElementById('host');
+      const root = host.attachShadow({ mode: 'open' });
+      root.innerHTML = '<button id="shadow-btn">Shadow Button</button><div id="host2"></div>';
+      const root2 = root.getElementById('host2').attachShadow({ mode: 'open' });
+      root2.innerHTML = '<button id="deep-btn">Deep Shadow Button</button>';
+    </script>
+
+    <script src="harness.js"></script>
+    <script>
+      // Runs at top level so frame chains and live counts are measured against
+      // the real page (no parent iframe polluting the chain).
+      window.addEventListener('load', () => {
+        const summary = document.getElementById('summary');
+        fetch('check.js')
+          .then((r) => r.text())
+          .then((src) => {
+            const report = JSON.parse(eval(src));
+            summary.innerHTML = report.pass
+              ? '<span class="badge pass">PASS</span> — ' + report.checks.length + ' checks'
+              : '<span class="badge fail">FAIL</span> — ' +
+                report.checks.filter((c) => !c.pass).length + ' of ' + report.checks.length + ' failed';
+            const rows = report.checks
+              .map(
+                (c) =>
+                  '<tr><td>' + (c.pass ? '<span class="pass">PASS</span>' : '<span class="fail">FAIL</span>') +
+                  '</td><td>' + c.name + '</td><td><code>' +
+                  String(c.detail == null ? '' : JSON.stringify(c.detail)) + '</code></td></tr>',
+              )
+              .join('');
+            document.getElementById('out').innerHTML =
+              '<table><tr><th></th><th>Check</th><th>Detail</th></tr>' + rows + '</table>' +
+              '<h2>Sample emitted locators</h2><pre>' + JSON.stringify(report.data, null, 2) + '</pre>';
+          })
+          .catch((e) => {
+            summary.innerHTML = '<span class="fail">ERROR</span> — ' + e.message;
+          });
+      });
+    </script>
+  </body>
+</html>

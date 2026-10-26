@@ -1,0 +1,13 @@
+# Generated harness builds — regenerate, don't commit.
+#   npm run test:fixtures            -> harness.js
+#   node test/pom-live-*.mjs / esbuild bundles -> pom-live.js, pom-live/*.cjs
+#   node test/panel-*.mjs            -> panel-built.js, panel-stubs-nav.js, panel-harness-nav.html
+harness.js
+pom-live.js
+panel-built.js
+panel-stubs-nav.js
+panel-harness-nav.html
+pom-live/*.cjs
+
+# Generated test output (Page Objects / tests produced by the check scripts).
+pom-live/output/

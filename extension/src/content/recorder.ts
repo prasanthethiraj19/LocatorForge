@@ -15,6 +15,8 @@
  * main thread (esbuild as `recorder.js`, format `iife`).
  */
 
+import { serializeElement } from '../panel/lib/locators/serialize';
+
 interface RecorderRuntimeMessage {
   type: 'REC_START' | 'REC_STOP';
 }
@@ -37,269 +39,13 @@ function ensureIndicator(): HTMLDivElement {
 }
 
 function showIndicator() {
+  // Only the top frame renders the recording dot.
+  if (window !== window.top) return;
   ensureIndicator().style.display = 'block';
 }
 
 function hideIndicator() {
   if (indicator) indicator.style.display = 'none';
-}
-
-/* ── Serialization (kept in sync with lib/locators/serialize.ts) ────── */
-
-function attrsOf(node: Element): Record<string, string> {
-  const out: Record<string, string> = {};
-  const attrs = node.attributes;
-  for (let i = 0; i < attrs.length; i++) {
-    const a = attrs[i];
-    out[a.name] = a.value;
-  }
-  return out;
-}
-
-function shadowHostOf(node: Element): Element | null {
-  const root = node.getRootNode ? (node.getRootNode() as ShadowRoot | Document) : null;
-  if (root && root !== document && (root as ShadowRoot).host) return (root as ShadowRoot).host as Element;
-  return null;
-}
-
-function isSvg(node: Element): boolean {
-  return node.namespaceURI === 'http://www.w3.org/2000/svg';
-}
-
-function bestSelectorForHost(host: Element): string {
-  const id = (host as HTMLElement).id;
-  if (id) {
-    try {
-      if (document.querySelectorAll('#' + CSS.escape(id)).length === 1) return '#' + CSS.escape(id);
-    } catch {}
-  }
-  const ds = host.getAttribute('data-testid');
-  if (ds) return `[data-testid=${JSON.stringify(ds)}]`;
-  return host.tagName.toLowerCase();
-}
-
-function buildShadowChain(node: Element): string[] {
-  const chain: string[] = [];
-  let cur: Element | null = node;
-  let safety = 0;
-  while (cur && safety++ < 50) {
-    const host = shadowHostOf(cur);
-    if (!host) break;
-    chain.unshift(bestSelectorForHost(host));
-    cur = host;
-  }
-  return chain;
-}
-
-function buildFrameChain(): string[] {
-  const chain: string[] = [];
-  try {
-    let w: Window = window;
-    let safety = 0;
-    while (w !== w.parent && safety++ < 20) {
-      const f = w.frameElement as HTMLElement | null;
-      if (!f) break;
-      let sel: string;
-      if (f.id) sel = '#' + CSS.escape(f.id);
-      else if (f.getAttribute('name')) sel = `iframe[name=${JSON.stringify(f.getAttribute('name'))}]`;
-      else sel = 'iframe';
-      chain.unshift(sel);
-      w = w.parent;
-    }
-  } catch {
-    chain.push('iframe');
-  }
-  return chain;
-}
-
-function getCss(node: Element): string {
-  const parts: string[] = [];
-  let cur: Element | null = node;
-  let safety = 0;
-  while (cur && cur.nodeType === 1 && cur !== document.body && safety++ < 100) {
-    if (shadowHostOf(cur)) break;
-    let s = cur.tagName.toLowerCase();
-    const id = (cur as HTMLElement).id;
-    if (id) {
-      try {
-        if (document.querySelectorAll('#' + CSS.escape(id)).length === 1) {
-          parts.unshift('#' + CSS.escape(id));
-          return parts.join(' > ');
-        }
-      } catch {}
-    }
-    const parent: Element | null = cur.parentElement;
-    if (parent) {
-      const sib = Array.from(parent.children).filter((c) => c.tagName === cur!.tagName);
-      if (sib.length > 1) s += `:nth-of-type(${sib.indexOf(cur) + 1})`;
-    }
-    parts.unshift(s);
-    cur = parent;
-  }
-  return parts.join(' > ') || node.tagName.toLowerCase();
-}
-
-function getXPathStructural(node: Element): string {
-  const id = (node as HTMLElement).id;
-  if (id) {
-    try {
-      if (document.querySelectorAll(`[id=${JSON.stringify(id)}]`).length === 1) {
-        return `//*[@id=${JSON.stringify(id)}]`;
-      }
-    } catch {}
-  }
-  const parts: string[] = [];
-  let cur: Element | null = node;
-  let safety = 0;
-  while (cur && cur.nodeType === 1 && safety++ < 100) {
-    if (shadowHostOf(cur)) break;
-    const parent: Element | null = cur.parentElement;
-    if (!parent || parent.nodeType !== 1) {
-      parts.unshift(cur.tagName.toLowerCase());
-      break;
-    }
-    const sib = Array.from(parent.children).filter((c) => c.tagName === cur!.tagName);
-    const idx = sib.indexOf(cur) + 1;
-    parts.unshift(cur.tagName.toLowerCase() + (sib.length > 1 ? `[${idx}]` : ''));
-    cur = parent;
-  }
-  return '//' + parts.join('/');
-}
-
-function getXPathAbsolute(node: Element): string {
-  const parts: string[] = [];
-  let cur: Element | null = node;
-  let safety = 0;
-  while (cur && cur.nodeType === 1 && safety++ < 100) {
-    if (shadowHostOf(cur)) break;
-    const parent: Element | null = cur.parentElement;
-    if (!parent || parent.nodeType !== 1) {
-      parts.unshift(cur.tagName.toLowerCase());
-      break;
-    }
-    const sib = Array.from(parent.children).filter((c) => c.tagName === cur!.tagName);
-    const idx = sib.indexOf(cur) + 1;
-    parts.unshift(cur.tagName.toLowerCase() + `[${idx}]`);
-    cur = parent;
-  }
-  return '/' + parts.join('/');
-}
-
-function getXPathPosition(node: Element): string {
-  const parts: string[] = [];
-  let cur: Element | null = node;
-  let safety = 0;
-  while (cur && cur.nodeType === 1 && cur.tagName.toLowerCase() !== 'html' && safety++ < 100) {
-    const parent: Element | null = cur.parentElement;
-    if (!parent || parent.nodeType !== 1) break;
-    const idx = Array.prototype.indexOf.call(parent.children, cur) + 1;
-    parts.unshift(`${cur.tagName.toLowerCase()}[position()=${idx}]`);
-    cur = parent;
-  }
-  return '//' + parts.join('/');
-}
-
-function findAncestorAnchor(node: Element): { selector: string; tag: string } | null {
-  let cur: Element | null = node.parentElement;
-  let safety = 0;
-  while (cur && cur !== document.body && safety++ < 50) {
-    const id = (cur as HTMLElement).id;
-    if (id) {
-      try {
-        if (document.querySelectorAll('#' + CSS.escape(id)).length === 1) {
-          return { selector: '#' + CSS.escape(id), tag: cur.tagName.toLowerCase() };
-        }
-      } catch {}
-    }
-    const role = cur.getAttribute('role');
-    if (role === 'main' || role === 'navigation' || role === 'form' || role === 'dialog') {
-      return { selector: `[role=${JSON.stringify(role)}]`, tag: cur.tagName.toLowerCase() };
-    }
-    const t = cur.tagName.toLowerCase();
-    if (t === 'main' || t === 'nav' || t === 'form' || t === 'dialog' || t === 'header' || t === 'footer' || t === 'aside') {
-      return { selector: t, tag: t };
-    }
-    cur = cur.parentElement;
-  }
-  return null;
-}
-
-function visibleTextOf(node: Element): string {
-  return (node.textContent || '').replace(/\s+/g, ' ').trim();
-}
-
-function findLabelText(node: Element): string {
-  const id = (node as HTMLElement).id;
-  if (id) {
-    try {
-      const lab = document.querySelector(`label[for=${JSON.stringify(id)}]`);
-      if (lab) return visibleTextOf(lab);
-    } catch {}
-  }
-  let p: Element | null = node.parentElement;
-  while (p) {
-    if (p.tagName && p.tagName.toLowerCase() === 'label') return visibleTextOf(p);
-    p = p.parentElement;
-  }
-  return '';
-}
-
-function ariaLabelledByText(a: Record<string, string>): string {
-  const ids = (a['aria-labelledby'] || '').split(/\s+/).filter(Boolean);
-  if (!ids.length) return '';
-  return ids
-    .map((id) => {
-      const r = document.getElementById(id);
-      return r ? visibleTextOf(r) : '';
-    })
-    .filter(Boolean)
-    .join(' ');
-}
-
-function serializeElement(el: Element): unknown {
-  const a = attrsOf(el);
-  const tag = el.tagName.toLowerCase();
-  const text = visibleTextOf(el);
-  let directText = '';
-  el.childNodes.forEach((n) => {
-    if (n.nodeType === 3) directText += n.textContent || '';
-  });
-  directText = directText.replace(/\s+/g, ' ').trim();
-
-  const testIds: Record<string, string> = {};
-  for (const key of Object.keys(a)) {
-    if (/^data-(testid|test-id|qa|qa-id|cy|test)$/i.test(key)) testIds[key] = a[key];
-  }
-
-  const shadowChain = buildShadowChain(el);
-  const frameChain = buildFrameChain();
-  const anchor = findAncestorAnchor(el);
-  const anchorOut = anchor ? { selector: anchor.selector, chain: anchor.selector } : null;
-
-  return {
-    tag,
-    attrs: a,
-    textContent: text,
-    visibleText: directText || text,
-    alt: a.alt || '',
-    title: a.title || '',
-    placeholder: a.placeholder || '',
-    ariaLabel: a['aria-label'] || '',
-    ariaLabelledByText: ariaLabelledByText(a),
-    labelText: findLabelText(el),
-    role: a.role || '',
-    testIds,
-    cssPath: getCss(el),
-    xpath: getXPathStructural(el),
-    xpathAbsolute: getXPathAbsolute(el),
-    xpathPosition: getXPathPosition(el),
-    ancestorAnchor: anchorOut,
-    shadowChain,
-    frameChain,
-    isSvg: isSvg(el),
-    inShadowRoot: shadowChain.length > 0,
-    inIframe: frameChain.length > 0,
-  };
 }
 
 /* ── Event capture ──────────────────────────────────────────────────── */
@@ -343,10 +89,21 @@ function flushPendingInput() {
   }
 }
 
+// Shadow DOM retargets events to the host, so resolve the real node from the
+// composed path before serializing the recorded target.
+function deepTarget(e: Event): Element | null {
+  const path = typeof e.composedPath === 'function' ? e.composedPath() : [];
+  for (const n of path) {
+    if (n && (n as Node).nodeType === 1) return n as Element;
+  }
+  const t = e.target as Element | null;
+  return t && t.nodeType === 1 ? t : null;
+}
+
 function onClick(e: MouseEvent) {
   if (!recording) return;
-  const t = e.target as Element | null;
-  if (!t || t.nodeType !== 1) return;
+  const t = deepTarget(e);
+  if (!t) return;
   if (e.detail >= 2) return; // dblclick handler will cover this
   flushPendingInput();
   send('click', t);
@@ -354,16 +111,16 @@ function onClick(e: MouseEvent) {
 
 function onDblClick(e: MouseEvent) {
   if (!recording) return;
-  const t = e.target as Element | null;
-  if (!t || t.nodeType !== 1) return;
+  const t = deepTarget(e);
+  if (!t) return;
   flushPendingInput();
   send('dblclick', t);
 }
 
 function onInput(e: Event) {
   if (!recording) return;
-  const t = e.target as Element | null;
-  if (!t || t.nodeType !== 1) return;
+  const t = deepTarget(e);
+  if (!t) return;
   if (!isEditable(t)) return;
   const val =
     (t as HTMLInputElement | HTMLTextAreaElement).value !== undefined
@@ -383,8 +140,8 @@ function onInput(e: Event) {
 
 function onChange(e: Event) {
   if (!recording) return;
-  const t = e.target as Element | null;
-  if (!t || t.nodeType !== 1) return;
+  const t = deepTarget(e);
+  if (!t) return;
   if (t.tagName.toLowerCase() === 'select') {
     flushPendingInput();
     const sel = t as HTMLSelectElement;
@@ -400,7 +157,7 @@ function onKeyDown(e: KeyboardEvent) {
   // which is already covered by `input`.
   const interesting = ['Enter', 'Tab', 'Escape', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
   if (!interesting.includes(e.key)) return;
-  const t = (e.target as Element) || document.activeElement;
+  const t = deepTarget(e) || (document.activeElement as Element | null);
   if (!t || t.nodeType !== 1) return;
   if (e.key === 'Enter') flushPendingInput();
   send('press', t as Element, e.key);

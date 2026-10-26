@@ -1,0 +1,182 @@
+{
+  "url": "https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index",
+  "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index",
+  "className": "DashboardPage",
+  "skipped": [
+    ".oxd-dashboard-grid .oxd-grid-item (not found)"
+  ],
+  "fieldNames": [
+    "headingDashboard",
+    "textboxSearch",
+    "linkAdmin",
+    "mandaUser",
+    "imgClientBrandBanner"
+  ],
+  "kinds": [
+    "role",
+    "role",
+    "role",
+    "text",
+    "role"
+  ],
+  "locators": [
+    {
+      "role": "heading",
+      "name": "Dashboard"
+    },
+    {
+      "role": "textbox",
+      "name": "Search"
+    },
+    {
+      "role": "link",
+      "name": "Admin"
+    },
+    {
+      "value": "manda user"
+    },
+    {
+      "role": "img",
+      "name": "client brand banner"
+    }
+  ],
+  "items": [
+    {
+      "id": "1",
+      "fieldName": "headingDashboard",
+      "candidate": {
+        "kind": "role",
+        "rank": 1,
+        "args": {
+          "role": "heading",
+          "name": "Dashboard"
+        },
+        "matchCount": 0,
+        "isUnique": false,
+        "stability": "fragile",
+        "section": "recommended",
+        "description": "role=heading, name=\"Dashboard\"",
+        "lints": [
+          {
+            "rule": "no-match",
+            "severity": "warn",
+            "message": "Matches zero elements on current page — check input or page state."
+          }
+        ],
+        "rationale": "Matches zero elements on current page — check input or page state."
+      },
+      "addedAt": 1792987474029,
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index"
+    },
+    {
+      "id": "2",
+      "fieldName": "textboxSearch",
+      "candidate": {
+        "kind": "role",
+        "rank": 1,
+        "args": {
+          "role": "textbox",
+          "name": "Search"
+        },
+        "matchCount": 0,
+        "isUnique": false,
+        "stability": "fragile",
+        "section": "recommended",
+        "description": "role=textbox, name=\"Search\"",
+        "lints": [
+          {
+            "rule": "no-match",
+            "severity": "warn",
+            "message": "Matches zero elements on current page — check input or page state."
+          }
+        ],
+        "rationale": "Matches zero elements on current page — check input or page state."
+      },
+      "addedAt": 1792987474032,
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index"
+    },
+    {
+      "id": "3",
+      "fieldName": "linkAdmin",
+      "candidate": {
+        "kind": "role",
+        "rank": 1,
+        "args": {
+          "role": "link",
+          "name": "Admin"
+        },
+        "matchCount": 0,
+        "isUnique": false,
+        "stability": "fragile",
+        "section": "recommended",
+        "description": "role=link, name=\"Admin\"",
+        "lints": [
+          {
+            "rule": "no-match",
+            "severity": "warn",
+            "message": "Matches zero elements on current page — check input or page state."
+          }
+        ],
+        "rationale": "Matches zero elements on current page — check input or page state."
+      },
+      "addedAt": 1792987474036,
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index"
+    },
+    {
+      "id": "4",
+      "fieldName": "mandaUser",
+      "candidate": {
+        "kind": "text",
+        "rank": 4,
+        "args": {
+          "value": "manda user"
+        },
+        "matchCount": 0,
+        "isUnique": false,
+        "stability": "fragile",
+        "section": "alternative",
+        "description": "By text \"manda user\"",
+        "lints": [
+          {
+            "rule": "no-match",
+            "severity": "warn",
+            "message": "Matches zero elements on current page — check input or page state."
+          }
+        ],
+        "rationale": "Matches zero elements on current page — check input or page state."
+      },
+      "addedAt": 1792987474040,
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index"
+    },
+    {
+      "id": "5",
+      "fieldName": "imgClientBrandBanner",
+      "candidate": {
+        "kind": "role",
+        "rank": 1,
+        "args": {
+          "role": "img",
+          "name": "client brand banner"
+        },
+        "matchCount": 0,
+        "isUnique": false,
+        "stability": "fragile",
+        "section": "recommended",
+        "description": "role=img, name=\"client brand banner\"",
+        "lints": [
+          {
+            "rule": "no-match",
+            "severity": "warn",
+            "message": "Matches zero elements on current page — check input or page state."
+          }
+        ],
+        "rationale": "Matches zero elements on current page — check input or page state."
+      },
+      "addedAt": 1792987474042,
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index"
+    }
+  ],
+  "code": "import { type Locator, type Page } from '@playwright/test';\n\nexport class DashboardPage {\n  readonly page: Page;\n  readonly headingDashboard: Locator;\n  readonly textboxSearch: Locator;\n  readonly linkAdmin: Locator;\n  readonly mandaUser: Locator;\n  readonly imgClientBrandBanner: Locator;\n\n  constructor(page: Page) {\n    this.page = page;\n    this.headingDashboard = page.getByRole(\"heading\", { name: \"Dashboard\" });\n    this.textboxSearch = page.getByRole(\"textbox\", { name: \"Search\" });\n    this.linkAdmin = page.getByRole(\"link\", { name: \"Admin\" });\n    this.mandaUser = page.getByText(\"manda user\");\n    this.imgClientBrandBanner = page.getByRole(\"img\", { name: \"client brand banner\" });\n  }\n\n  async goto() {\n    await this.page.goto(\"https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index\");\n  }\n}\n",
+  "requestedUrl": "https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index",
+  "capturedUrl": "https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index"
+}

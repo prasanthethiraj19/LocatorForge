@@ -20,6 +20,7 @@ import {
   type RecordedStep,
   type WorkerToPanelRecorder,
 } from '../lib/recorder/types';
+import { pageKeyFromUrl } from '../lib/pom/naming';
 
 const MAX_STEPS = 50;
 
@@ -37,11 +38,13 @@ export interface UseRecorder {
   capped: boolean;
 }
 
-export function useRecorder(): UseRecorder {
+export function useRecorder(currentUrl: string): UseRecorder {
   const [recording, setRecording] = useState(false);
   const [steps, setSteps] = useState<RecordedStep[]>([]);
   const [capped, setCapped] = useState(false);
   const portRef = useRef<chrome.runtime.Port | null>(null);
+  const urlRef = useRef(currentUrl);
+  urlRef.current = currentUrl;
 
   useEffect(() => {
     function connect() {
@@ -59,7 +62,11 @@ export function useRecorder(): UseRecorder {
               setCapped(true);
               return prev;
             }
-            const next: RecordedStep = { id: genId(), ...msg.step };
+            const next: RecordedStep = {
+              id: genId(),
+              ...msg.step,
+              pageKey: pageKeyFromUrl(urlRef.current),
+            };
             return [...prev, next];
           });
         } else if (msg.type === 'REC_STARTED') {

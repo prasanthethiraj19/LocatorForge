@@ -26,6 +26,7 @@ const KIND_LABEL: Record<Candidate['kind'], string> = {
   testid: 'testId',
   id: 'id',
   name: 'name',
+  svg: 'svg',
   css: 'css',
   xpath: 'xpath',
   xpathAbs: 'xpath·abs',

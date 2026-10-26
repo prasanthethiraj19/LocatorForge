@@ -1,0 +1,102 @@
+{
+  "framework": "playwright-ts",
+  "generatedAt": "2026-10-26T04:06:04.142Z",
+  "pages": [
+    {
+      "slug": "admin-viewsystemusers",
+      "url": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers",
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/admin/viewSystemUsers",
+      "className": "AdminViewSystemUsersPage",
+      "ownItems": 6,
+      "totalBasketItems": 27,
+      "foreignItemsLeaked": 0,
+      "fields": [
+        "headingAdmin",
+        "textboxTypeForHints",
+        "buttonSearch",
+        "rowgroup",
+        "row",
+        "select"
+      ],
+      "file": "output/admin-viewsystemusers.page.ts"
+    },
+    {
+      "slug": "auth-login",
+      "url": "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login",
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login",
+      "className": "LoginPage",
+      "ownItems": 6,
+      "totalBasketItems": 27,
+      "foreignItemsLeaked": 0,
+      "fields": [
+        "textboxUsername",
+        "textboxPassword",
+        "buttonLogin",
+        "forgotYourPassword",
+        "imgCompanyBranding",
+        "link"
+      ],
+      "file": "output/auth-login.page.ts"
+    },
+    {
+      "slug": "dashboard-index",
+      "url": "https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index",
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index",
+      "className": "DashboardPage",
+      "ownItems": 5,
+      "totalBasketItems": 27,
+      "foreignItemsLeaked": 0,
+      "fields": [
+        "headingDashboard",
+        "textboxSearch",
+        "linkAdmin",
+        "mandaUser",
+        "imgClientBrandBanner"
+      ],
+      "file": "output/dashboard-index.page.ts"
+    },
+    {
+      "slug": "leave-viewleavelist",
+      "url": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/viewLeaveList",
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/leave/viewLeaveList",
+      "className": "LeaveViewLeaveListPage",
+      "ownItems": 4,
+      "totalBasketItems": 27,
+      "foreignItemsLeaked": 0,
+      "fields": [
+        "headingLeave",
+        "buttonSearch",
+        "rowgroup",
+        "textboxYyyyDdMm"
+      ],
+      "file": "output/leave-viewleavelist.page.ts"
+    },
+    {
+      "slug": "pim-viewemployeelist",
+      "url": "https://opensource-demo.orangehrmlive.com/web/index.php/pim/viewEmployeeList",
+      "pageKey": "https://opensource-demo.orangehrmlive.com/web/index.php/pim/viewEmployeeList",
+      "className": "PimViewEmployeeListPage",
+      "ownItems": 6,
+      "totalBasketItems": 27,
+      "foreignItemsLeaked": 0,
+      "fields": [
+        "headingPim",
+        "textboxTypeForHints",
+        "textboxSearch",
+        "buttonSearch",
+        "rowgroup",
+        "row"
+      ],
+      "file": "output/pim-viewemployeelist.page.ts"
+    }
+  ],
+  "checks": {
+    "pagesHarvested": 5,
+    "distinctClassNames": 5,
+    "distinctFieldSets": 5,
+    "allClassesUnique": true,
+    "allFieldSetsUnique": true,
+    "totalBasketItems": 27,
+    "buggyFileFieldsInOneClass": 27
+  }
+}
