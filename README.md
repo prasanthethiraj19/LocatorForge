@@ -4,7 +4,7 @@
 
 [![Free](https://img.shields.io/badge/Free-Forever-10b981)](https://locatorforge.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-0.9.12-emerald)](./extension/package.json)
+[![Version](https://img.shields.io/badge/version-0.9.13-emerald)](./extension/package.json)
 [![Browsers](https://img.shields.io/badge/browsers-Chrome%20%26%20Edge-blue)](https://locatorforge.com)
 
 **Live site:** [https://locatorforge.vercel.app/]
