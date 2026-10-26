@@ -26,8 +26,11 @@ Output supported in: **Playwright** (TS / JS / Python / Java), **Selenium** (Jav
 cd chrome-extension
 npm install
 npm run build       # produces dist/
-npm run package     # zips dist/ → ../public/downloads/locatorforge-v{VERSION}.zip
+npm run release     # sync version → build chrome + edge → zip into ../website/public/downloads/
 ```
+
+The version is generated from the commit count (`scripts/version.mjs`), so the
+packaged manifest always matches the deploy that shipped it.
 
 ## Install (unpacked)
 

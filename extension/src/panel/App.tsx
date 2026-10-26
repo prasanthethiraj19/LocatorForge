@@ -22,6 +22,7 @@ import { useLocatorHistory } from './hooks/useLocatorHistory';
 import { useRecorder } from './hooks/useRecorder';
 import { useFreeze } from './hooks/useFreeze';
 import { generateCandidates, sortCandidates } from './lib/locators/generate';
+import { APP_VERSION } from './lib/appVersion';
 import { formatExpression } from './lib/locators/format';
 import { getFramework, DEFAULT_FRAMEWORK } from './lib/locators/frameworks';
 import type { Candidate, FrameworkId } from './lib/locators/types';
@@ -199,7 +200,7 @@ export default function App() {
         <div className="qlc-footer-meta">
           <span><kbd>⌘</kbd>/<kbd>Ctrl</kbd>+<kbd>↵</kbd> top · <kbd>⌘⇧P</kbd> POM · <kbd>⌘⇧H</kbd> history · <kbd>⌘⇧R</kbd> rec · <kbd>⌘⇧F</kbd> freeze · <kbd>⌘⇧D</kbd> test data · <kbd>⌘⇧E</kbd> export</span>
         </div>
-        <span>LocatorForge v0.9.1</span>
+        <span>LocatorForge v{APP_VERSION}</span>
       </div>
 
       <SettingsSheet

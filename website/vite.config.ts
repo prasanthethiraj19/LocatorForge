@@ -2,6 +2,7 @@ import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'node:path';
 import { GET, POST } from '../api/stats';
+import { getVersion } from '../scripts/version.mjs';
 
 function statsApi(): Plugin {
   return {
@@ -30,6 +31,11 @@ function statsApi(): Plugin {
 
 export default defineConfig({
   plugins: [react(), statsApi()],
+  // The version is resolved at build time (commit count, see scripts/version.mjs),
+  // so every deploy renders its own version instead of a hand-edited constant.
+  define: {
+    __APP_VERSION__: JSON.stringify(getVersion()),
+  },
   resolve: {
     alias: { '@': resolve(__dirname, 'src') },
   },

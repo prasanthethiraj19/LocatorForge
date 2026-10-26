@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "LocatorForge",
   "short_name": "LocatorForge",
-  "version": "0.9.1",
+  "version": "0.9.11",
   "description": "Fast Playwright, Selenium, Cypress, WebdriverIO and Robot Framework locators — straight from Edge DevTools. Recorder, freeze, test data, exports. No ads, no tracking, no BS.",
   "minimum_chrome_version": "116",
   "icons": {
@@ -21,30 +21,58 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "css": ["content.css"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
       "run_at": "document_idle",
       "all_frames": true
     },
     {
-      "matches": ["<all_urls>"],
-      "js": ["freeze.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "freeze.js"
+      ],
       "run_at": "document_idle",
       "all_frames": false
     },
     {
-      "matches": ["<all_urls>"],
-      "js": ["recorder.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "recorder.js"
+      ],
       "run_at": "document_idle",
       "all_frames": true
     }
   ],
-  "permissions": ["activeTab", "scripting", "storage", "contextMenus", "sidePanel"],
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "contextMenus",
+    "sidePanel"
+  ],
   "web_accessible_resources": [
     {
-      "resources": ["content.css", "freeze.css", "recorder.css", "freeze.js", "recorder.js"],
-      "matches": ["<all_urls>"]
+      "resources": [
+        "content.css",
+        "freeze.css",
+        "recorder.css",
+        "freeze.js",
+        "recorder.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ],
   "action": {

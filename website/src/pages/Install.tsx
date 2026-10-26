@@ -20,7 +20,7 @@ const STEPS: Record<Browser, { title: string; body: React.ReactNode }[]> = {
       title: 'Download the zip',
       body: (
         <>
-          Click the Chrome button below — saves <code className="code-chip">locatorforge-chrome-v{VERSION}.zip</code>.
+          Click the Chrome button below — saves <code className="code-chip">locatorforge-chrome.zip</code> (v{VERSION}).
         </>
       ),
     },
@@ -55,7 +55,7 @@ const STEPS: Record<Browser, { title: string; body: React.ReactNode }[]> = {
       title: 'Download the zip',
       body: (
         <>
-          Click the Edge button below — saves <code className="code-chip">locatorforge-edge-v{VERSION}.zip</code>.
+          Click the Edge button below — saves <code className="code-chip">locatorforge-edge.zip</code> (v{VERSION}).
         </>
       ),
     },

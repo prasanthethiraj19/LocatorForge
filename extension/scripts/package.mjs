@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import archiver from 'archiver';
 import { createWriteStream, existsSync } from 'node:fs';
-import { mkdir, readFile } from 'node:fs/promises';
+import { mkdir, readdir, rm } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { getVersion } from '../../scripts/version.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -23,13 +24,23 @@ async function main() {
     process.exit(1);
   }
 
-  const pkg = JSON.parse(await readFile(resolve(root, 'package.json'), 'utf8'));
-  const version = pkg.version;
-  const name = pkg.name;
+  const version = getVersion();
+  const name = 'locatorforge';
   const outDir = resolve(root, '..', 'website', 'public', 'downloads');
   await mkdir(outDir, { recursive: true });
 
-  const outFile = resolve(outDir, `${name}-${target}-v${version}.zip`);
+  // Stable filename: deploy builds overwrite the same artifact, so the site link
+  // is never version-broken. The version lives in the manifest inside the zip and
+  // is shown in the UI. Drop zips left behind by the old versioned naming.
+  const outFile = resolve(outDir, `${name}-${target}.zip`);
+  const keep = new Set([`${name}-chrome.zip`, `${name}-edge.zip`]);
+  for (const f of await readdir(outDir)) {
+    if (f.startsWith(`${name}-`) && f.endsWith('.zip') && !keep.has(f)) {
+      await rm(resolve(outDir, f));
+      console.log(`[package] removed stale ${f}`);
+    }
+  }
+
   const stream = createWriteStream(outFile);
   const archive = archiver('zip', { zlib: { level: 9 } });
 
@@ -42,7 +53,7 @@ async function main() {
     archive.finalize();
   });
 
-  console.log(`[package] wrote ${outFile} (${(archive.pointer() / 1024).toFixed(1)} KB)`);
+  console.log(`[package] wrote ${outFile} (${(archive.pointer() / 1024).toFixed(1)} KB, v${version})`);
 }
 
 main().catch((e) => {

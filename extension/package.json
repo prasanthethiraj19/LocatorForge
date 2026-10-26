@@ -1,7 +1,7 @@
 {
   "name": "locatorforge",
   "private": true,
-  "version": "0.9.1",
+  "version": "0.9.11",
   "description": "LocatorForge — fast Chrome DevTools extension. Playwright, Selenium, Cypress, WebdriverIO, Robot Framework locators. No ads, no tracking, no BS.",
   "type": "module",
   "scripts": {
@@ -12,7 +12,8 @@
     "package": "node scripts/package.mjs",
     "package:chrome": "node scripts/package.mjs --target=chrome",
     "package:edge": "node scripts/package.mjs --target=edge",
-    "release": "npm run build:chrome && npm run build:edge && npm run package:chrome && npm run package:edge",
+    "version:sync": "node ../scripts/sync-version.mjs",
+    "release": "npm run version:sync && npm run build:chrome && npm run build:edge && npm run package:chrome && npm run package:edge",
     "typecheck": "tsc --noEmit",
     "test:fixtures": "esbuild test/harness.ts --bundle --format=iife --outfile=test/harness.js --target=chrome116",
     "clean": "rm -rf dist"

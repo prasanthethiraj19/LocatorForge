@@ -4,7 +4,7 @@
 
 [![Free](https://img.shields.io/badge/Free-Forever-10b981)](https://locatorforge.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-0.9.1-emerald)](./extension/package.json)
+[![Version](https://img.shields.io/badge/version-0.9.11-emerald)](./extension/package.json)
 [![Browsers](https://img.shields.io/badge/browsers-Chrome%20%26%20Edge-blue)](https://locatorforge.com)
 
 **Live site:** [https://locatorforge.vercel.app/]
@@ -154,11 +154,40 @@ npm install
 npm run build:chrome     # → extension/dist/chrome/
 npm run build:edge       # → extension/dist/edge/
 
-npm run package:chrome   # zips dist/chrome/ → ../website/public/downloads/locatorforge-chrome-v{VERSION}.zip
-npm run package:edge     # zips dist/edge/   → ../website/public/downloads/locatorforge-edge-v{VERSION}.zip
+npm run package:chrome   # zips dist/chrome/ → ../website/public/downloads/locatorforge-chrome.zip
+npm run package:edge     # zips dist/edge/   → ../website/public/downloads/locatorforge-edge.zip
 
-npm run release          # build + package both browsers in one go
+npm run release          # sync version + build + package both browsers in one go
 ```
+
+From the repo root, `npm run release` does the whole pipeline (sync version → build
+and package both extensions → build the website), which is exactly what the Vercel
+build runs.
+
+### Versioning
+
+The version is **generated from the repository**, never hand-edited:
+
+```
+<major>.<minor>.<commit count>      e.g. 0.9.11
+```
+
+`major.minor` lives in `extension/package.json` and is bumped by hand for a
+feature release; the patch is the commit count, so **every push to main produces a
+new, strictly increasing version** (safe for Chrome/Edge store uploads).
+
+- `npm run app:version` — print the version this checkout would build
+- `npm run version:sync` — write it into `package.json`, `extension/package.json`,
+  both extension manifests, `website/package.json`, the lock file and the README badge
+- Both builds inject it at build time (`__APP_VERSION__`), so the site and the
+  panel footer always display the version of the commit they were built from —
+  the live site updates itself on every deploy, nothing to remember.
+- `APP_VERSION=1.2.3` overrides it (hotfix builds).
+
+Download URLs are stable (`/downloads/locatorforge-chrome.zip`) with a `?v=` cache
+buster, and the zips are rebuilt on every deploy, so the served extension always
+matches the deployed site. They are build artifacts — `website/public/downloads/*.zip`
+is gitignored.
 
 Load unpacked in Chrome:
 

@@ -12,3 +12,7 @@ release/
 .vercel
 .env*
 !.env.example
+
+# Extension zips are build artifacts of every deploy (versioned per commit by
+# scripts/version.mjs) — regenerate with `npm run release`, never commit them.
+website/public/downloads/*.zip
